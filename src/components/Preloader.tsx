@@ -9,13 +9,13 @@ export default function Preloader() {
 
   useEffect(() => {
     setIsClient(true);
-    // Commented out session storage check for testing purposes
-    // const hasSeenPreloader = sessionStorage.getItem("btl-preloader-seen");
+    const hasSeenPreloader = sessionStorage.getItem("btl-preloader-seen");
+    if (hasSeenPreloader) return; // Skip preloader on repeat visits in same session
     
     setShow(true);
     const timer = setTimeout(() => {
       setShow(false);
-      // sessionStorage.setItem("btl-preloader-seen", "true");
+      sessionStorage.setItem("btl-preloader-seen", "true");
     }, 2800); 
     return () => clearTimeout(timer);
   }, []);

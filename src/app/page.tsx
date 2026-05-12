@@ -806,27 +806,25 @@ const BIBLE_BOOKS = [
   { id: "rev", name: "Revelation", nameUr: "مکاشفہ", chapters: 22, testament: "NT" },
 ];
 
-// Map book IDs to Internet Archive (bible_Audio_Urduirvurd) folder names
-// Source: https://archive.org/details/bible_Audio_Urduirvurd — Full Urdu Bible, Public Domain
-const ARCHIVE_AUDIO_MAP: Record<string, string> = {
-  gen: "genesis", exo: "exodus", lev: "leviticus", num: "numbers", deu: "deuteronomy",
-  jos: "joshua", jdg: "judges", rut: "ruth",
-  "1sa": "1samuel", "2sa": "2samuel", "1ki": "1kings", "2ki": "2kings",
-  "1ch": "1chronicles", "2ch": "2chronicles", ezr: "ezra", neh: "nehemiah", est: "esther",
-  job: "job", psa: "psalms", pro: "proverbs", ecc: "ecclesiastes", sos: "songofsolomon",
-  isa: "isaiah", jer: "jeremiah", lam: "lamentations", eze: "ezekiel", dan: "daniel",
-  hos: "hosea", jol: "joel", amo: "amos", oba: "obadiah", jon: "jonah",
-  mic: "micah", nah: "nahum", hab: "habakkuk", zep: "zephaniah", hag: "haggai",
-  zec: "zechariah", mal: "malachi",
-  mat: "matthew", mrk: "mark", luk: "luke", jhn: "john", act: "acts",
-  rom: "romans", "1co": "1corinthians", "2co": "2corinthians", gal: "galatians", eph: "ephesians",
-  php: "philippians", col: "colossians", "1th": "1thessalonians", "2th": "2thessalonians",
-  "1ti": "1timothy", "2ti": "2timothy", tit: "titus", phm: "philemon", heb: "hebrews",
-  jas: "james", "1pe": "1peter", "2pe": "2peter", "1jn": "1john", "2jn": "2john",
-  "3jn": "3john", jud: "jude", rev: "revelation",
+// Map book IDs to GBC Pakistan Urdu Audio Bible filenames
+// Source: https://www.gbcpakistan.org/urdu-bible/ — Christian Urdu Bible, Grace Bible Church Pakistan
+const GBC_AUDIO_MAP: Record<string, string> = {
+  gen: "Genesis", exo: "Exodus", lev: "Leviticus", num: "Numbers", deu: "Deuteronomy",
+  jos: "Joshua", jdg: "Judges", rut: "Ruth",
+  "1sa": "I_Samuel", "2sa": "II_Samuel", "1ki": "I_Kings", "2ki": "II_Kings",
+  "1ch": "I_Chronicles", "2ch": "II_Chronicles", ezr: "Ezra", neh: "Nehemiah", est: "Esther",
+  job: "Job", psa: "Psalms", pro: "Proverbs", ecc: "Ecclesiastes", sos: "Song_of_Solomon",
+  isa: "Isaiah", jer: "Jeremiah", lam: "Lamentations", eze: "Ezekiel", dan: "Daniel",
+  hos: "Hosea", jol: "Joel", amo: "Amos", oba: "Obadiah", jon: "Jonah",
+  mic: "Micah", nah: "Nahum", hab: "Habakkuk", zep: "Zephaniah", hag: "Haggai",
+  zec: "Zechariah", mal: "Malachi",
+  mat: "Mathew", mrk: "Mark", luk: "Luke", jhn: "John", act: "Acts",
+  rom: "Romans", "1co": "I_Corinthians", "2co": "II_Corinthians", gal: "Galatians", eph: "Ephesians",
+  php: "Philippians", col: "Colossians", "1th": "I_Thessalonians", "2th": "II_Thessalonians",
+  "1ti": "I_Timothy", "2ti": "II_Timothy", tit: "Titus", phm: "Philemon", heb: "Hebrews",
+  jas: "James", "1pe": "I_Peter", "2pe": "II_Peter", "1jn": "I_John", "2jn": "II_John",
+  "3jn": "III_John", jud: "Jude", rev: "Revelation",
 };
-// Archive.org base URL for the Urdu Bible audio collection
-const ARCHIVE_BASE = "https://ia902908.us.archive.org/16/items/bible_Audio_Urduirvurd";
 
 function UrduBiblePlayer() {
   const [selectedBook, setSelectedBook] = useState(BIBLE_BOOKS[39]); // Matthew by default
@@ -841,12 +839,9 @@ function UrduBiblePlayer() {
   const [audioError, setAudioError] = useState(false);
   const retryCountRef = useRef(0);
 
-  // Helper to get audio URL — uses Internet Archive Urdu Bible collection
-  const getAudioUrl = (bookId: string, chapter: number) => {
-    const folder = ARCHIVE_AUDIO_MAP[bookId];
-    const chNum = String(chapter).padStart(3, "0");
-    return `${ARCHIVE_BASE}/${folder}/${chNum}.mp3`;
-  };
+  // Helper to get audio URL — GBC Pakistan Christian Urdu Bible
+  const getAudioUrl = (bookId: string, chapter: number) =>
+    `https://www.gbcpakistan.org/mp3/urdu_bible/${GBC_AUDIO_MAP[bookId]}${chapter}.mp3`;
 
   // Core play function - with robust retry logic
   const loadAndPlay = useCallback((bookId: string, chapter: number) => {
@@ -1339,6 +1334,7 @@ function SoundCloudSection() {
                   scrolling="no"
                   frameBorder="no"
                   allow="autoplay"
+                  loading="lazy"
                   src={embedUrl}
                   className="w-full relative z-10 block"
                   title={`BTL TV - ${selectedPlaylist.title}`}
@@ -1398,7 +1394,7 @@ function HomePage({
             transition={{ duration: 0.8 }}
             className="absolute inset-0"
           >
-            <img src={hero.image} alt={hero.title} width={1280} height={720} className="w-full h-full object-cover" />
+            <img src={hero.image} alt={hero.title} width={1280} height={720} fetchPriority="high" decoding="async" className="w-full h-full object-cover" />
           </motion.div>
         </AnimatePresence>
         <div className="hero-gradient absolute inset-0" />

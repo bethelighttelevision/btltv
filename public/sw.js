@@ -1,4 +1,4 @@
-const CACHE_NAME = 'btl-tv-v2';
+const CACHE_NAME = 'btl-tv-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -43,8 +43,8 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (request.method !== 'GET') return;
 
-  // Skip external API calls (YouTube, HLS streams, etc.)
-  if (url.origin !== self.location.origin) return;
+  // Skip external API calls (YouTube, HLS streams, etc.) but allow fonts
+  if (url.origin !== self.location.origin && !url.hostname.includes('fonts.googleapis.com') && !url.hostname.includes('fonts.gstatic.com')) return;
 
   // For navigation requests — network first, fallback to cache
   if (request.mode === 'navigate') {
@@ -60,8 +60,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // For static assets (_next, images, etc.) — cache first, fallback to network
-  if (url.pathname.startsWith('/_next/') || url.pathname.startsWith('/images/') || url.pathname.startsWith('/favicon') || url.pathname.endsWith('.png') || url.pathname.endsWith('.jpg') || url.pathname.endsWith('.svg') || url.pathname.endsWith('.ico') || url.pathname.endsWith('.webp')) {
+  // For static assets (_next, images, fonts, etc.) — cache first, fallback to network
+  if (url.pathname.startsWith('/_next/') || url.pathname.startsWith('/images/') || url.pathname.startsWith('/favicon') || url.pathname.endsWith('.png') || url.pathname.endsWith('.jpg') || url.pathname.endsWith('.svg') || url.pathname.endsWith('.ico') || url.pathname.endsWith('.webp') || url.pathname.endsWith('.css') || url.pathname.endsWith('.js') || url.pathname.endsWith('.woff2') || url.pathname.endsWith('.woff') || url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com')) {
     event.respondWith(
       caches.match(request).then((cached) => {
         if (cached) return cached;
