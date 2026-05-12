@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Bot, User, ExternalLink, HelpCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { MessageCircle, X, Send, User } from "lucide-react";
 
 interface Message {
   id: string;
@@ -12,28 +11,119 @@ interface Message {
   isHtml?: boolean;
 }
 
-const BTL_INFO = {
-  about: "BTL TV (Be The Light Television) ek Masihi (Christian) channel hai jo Urdu zaban mein Pakistan aur poori duniya ke liye broadcast karta hai. Humara maqsad Khuda ke kalaam ko phailana hai.",
-  bible: "Aap humari website par Urdu Audio Bible sun sakte hain! Puraana aur Naya Ahd-nama dono maujood hain. Homepage par 'Urdu Bible' section check karein.",
-  school: "BTL Bible School ek muft online platform hai jahan aap Bible ki bunyadi taleemat seekh sakte hain aur certificate hasil kar sakte hain. Menu se 'Bible School' par click karein.",
-  live: "Aap humara 24/7 Live TV broadcast website ke 'Live TV' section mein dekh sakte hain.",
-  donate: "Aapki madad humari ministry ke liye bohot ahmiyat rakhti hai. Donate karne ke liye website ke 'Donation' page par jayen.",
-};
+// ─── MASSIVE LOCAL KNOWLEDGE BASE ───
+// The bot will search the user's input for any of these keywords.
+const KNOWLEDGE_BASE = [
+  // Live Support / Contact
+  {
+    keywords: ["support", "help", "contact", "whatsapp", "email", "phone", "insaan", "human", "madad", "rabta"],
+    answer: "Agar aap humari support team, pastors, ya BTL TV ke numaindon se baat karna chahte hain, toh kripya Contact page par jayen ya humein WhatsApp karein: <br/><br/><a href='/contact' class='text-btl-red underline font-bold'>Contact Page Par Jayen</a>"
+  },
+  
+  // BTL TV Core Info
+  {
+    keywords: ["btl", "btl tv", "btltv", "be the light", "channel", "about", "who are you", "tum kon ho"],
+    answer: "BTL TV (Be The Light Television) ek Masihi (Christian) channel hai jo Urdu zaban mein Pakistan aur poori duniya ke liye broadcast karta hai. Humara maqsad Khuda ke kalaam ko media ke zariye phailana hai. Main BTL TV ka AI Assistant hoon."
+  },
+  {
+    keywords: ["live", "tv", "broadcast", "watch", "dekhna"],
+    answer: "Aap humara 24/7 Live TV broadcast website ke 'Live TV' section mein dekh sakte hain. <a href='#' onclick='window.scrollTo(0,0)' class='text-btl-red underline'>Abhi Live Dekhein</a>"
+  },
+  {
+    keywords: ["donate", "donation", "fund", "hadiya", "pesa", "support ministry", "give"],
+    answer: "Aapki madad humari ministry ke liye bohot ahmiyat rakhti hai. Aap apna hadiya (donation) bhej kar BTL TV ki khidmat mein hissa le sakte hain. <a href='#' class='text-btl-red underline'>Donation page par jayen.</a>"
+  },
+  {
+    keywords: ["app", "download", "mobile", "android", "ios", "iphone"],
+    answer: "Aap is website ko apne phone mein 'Install App' par click karke (ya browser menu se Add to Home Screen karke) mobile app ki tarah use kar sakte hain!"
+  },
 
-const BIBLE_HISTORY = {
-  bible: "Bible (Khat-e-Muqaddas) 66 kitabon ka majmooa hai jise takreeban 40 mukhtalif logon ne 1500 saal ke arse mein Khuda ke rooh ki hidayat se likha.",
-  oldTestament: "Purana Ahd-Nama (Old Testament) mein 39 kitabein hain jo Ibrani (Hebrew) zaban mein likhi gayin. Isme Khuda ki paidaish se lekar anbiya ke daur tak ka zikr hai.",
-  newTestament: "Naya Ahd-Nama (New Testament) mein 27 kitabein hain jo zyada tar Yunaani (Greek) zaban mein likhi gayin. Yeh Yesu Masih ki zindagi, maut, aur ji uthne, aur ibtadai kalisiya ke baare mein hai.",
-  jesus: "Yesu Masih (Jesus Christ) Khuda ke betay hain jo insani roop mein zameen par aaye taake humare gunahon ke liye apni jaan qurban karein aur teesre din murdon mein se ji uthein.",
-  moses: "Moosa Nabi (Moses) ko Khuda ne chuna taake wo Bani Israeel ko misr (Egypt) ki ghulami se azaad karwayen. Khuda ne unhein 10 ahkaam (Ten Commandments) diye.",
-  david: "Dawood (David) Israeel ke doosre badshah the. Wo ek gadariya (shepherd) the jinhone Joliath ko haraya. Unhone Zaboor (Psalms) ki bohot si kitabein likhin.",
-};
+  // BTL TV Shows & Content
+  {
+    keywords: ["show", "program", "drama", "movie", "film", "kalam", "geet", "song", "music", "worship"],
+    answer: "BTL TV par bohot se behtareen programs chalte hain: <br/>- <b>Morning With Jesus</b><br/>- <b>Yesu Sang Sawera</b><br/>- <b>Bible Messages</b><br/>- <b>Masihi Dramas & Movies</b><br/>Aap homepage ke 'Shows' section mein ye sab dekh sakte hain!"
+  },
+  {
+    keywords: ["morning with jesus", "yesu sang sawera", "morning"],
+    answer: "'Morning With Jesus' aur 'Yesu Sang Sawera' humare bohot maqbool subah ke programs hain jismein roohani paigham, geet, aur duayen shamil hoti hain. Aap inhe humari site par dekh sakte hain."
+  },
+
+  // Bible School & Courses
+  {
+    keywords: ["school", "course", "study", "certificate", "seekhna", "padhna", "class", "admission"],
+    answer: "BTL Bible School ek muft online platform hai jahan aap Bible ki bunyadi taleemat seekh sakte hain aur Course mukammal karne par Certificate hasil kar sakte hain. Menu se 'Bible School' par click karein aur free mein enroll hon!"
+  },
+
+  // The Urdu Audio Bible
+  {
+    keywords: ["bible", "khat-e-muqaddas", "audio bible", "sunna", "sunni", "audio", "mp3", "kalam", "word of god"],
+    answer: "Aap humari website par <b>Pura Khat-e-Muqaddas (Urdu Audio Bible)</b> sun sakte hain! Puraana aur Naya Ahd-nama dono majood hain, jise GBC Pakistan ne record kiya hai. Homepage par 'Urdu Bible' player check karein."
+  },
+
+  // Deep Bible History & Theology
+  {
+    keywords: ["history", "tareekh", "tarikh"],
+    answer: "Bible ki tareekh bohot wasee hai! Bible (Khat-e-Muqaddas) 66 kitabon ka majmooa hai jise takreeban 40 mukhtalif logon ne 1500 saal ke arse mein Khuda ke rooh ki hidayat se likha. Aap Puranay Ahd-Name (Old Testament) ya Naye Ahd-Name (New Testament) ya kisi khaas Nabi ki tareekh ke bare mein pooch sakte hain."
+  },
+  {
+    keywords: ["old testament", "purana", "puranay", "ahd nama", "ahd-nama"],
+    answer: "Purana Ahd-Nama (Old Testament) mein 39 kitabein hain jo Ibrani (Hebrew) aur Aramaic zaban mein likhi gayin. Isme dunya ki paidaish, Bani Israeel ki tareekh, aur anbiya ki paishgoiyan (prophecies) hain jo Aanay walay Masih ke baare mein batati hain."
+  },
+  {
+    keywords: ["new testament", "naya", "naye", "injeel"],
+    answer: "Naya Ahd-Nama (New Testament) mein 27 kitabein hain jo zyada tar Yunaani (Greek) zaban mein likhi gayin. Yeh Yesu Masih ki zindagi, mojzat, maut, ji uthne (resurrection), aur ibtadai kalisiya (early church) ki history par mabni hai."
+  },
+  {
+    keywords: ["jesus", "yesu", "masih", "isa", "eesa", "christ"],
+    answer: "Yesu Masih (Jesus Christ) Khuda ke betay (Son of God) aur dunya ke munji (Saviour) hain. Wo insani roop mein zameen par aaye, humare gunahon ke liye Saleeb par apni jaan qurban ki, aur teesre din murdon mein se ji uthein. Wo raah, haq aur zindagi hain (Yohanna 14:6)."
+  },
+  {
+    keywords: ["god", "khuda", "allah", "yahweh", "rabb", "baap", "father"],
+    answer: "Humara Khuda wahid, zinda, aur sacha Khuda hai jo Baap, Betay (Yesu Masih), aur Rooh-ul-Qudus (Holy Spirit) mein zahir hota hai (Trinity). Wo mohabbat hai aur usne is dunya ko paida kiya."
+  },
+  {
+    keywords: ["rooh", "holy spirit", "qudus", "ruh"],
+    answer: "Rooh-ul-Qudus (Holy Spirit) Taslees (Trinity) ka teesra shakhs hai. Yesu ke aasman par jane ke baad, Rooh-ul-Qudus imandaron mein basta hai taake unhe tasalli de, hidayat kare, aur Khuda ki marzi par chalne ki taqat de."
+  },
+
+  // Prophets & Key Bible Figures
+  {
+    keywords: ["moses", "moosa", "musa"],
+    answer: "Moosa Nabi (Moses) ko Khuda ne chuna taake wo Bani Israeel ko Misr (Egypt) ki ghulami se azaad karwayen. Khuda ne unke zariye Darya-e-Qulzam (Red Sea) ko do hisso mein banta aur unhein Koh-e-Toor (Mount Sinai) par 10 ahkaam (Ten Commandments) diye."
+  },
+  {
+    keywords: ["david", "dawood", "dawud"],
+    answer: "Dawood (David) Israeel ke doosre aur sabse azeem badshah the. Wo ek gadariya (shepherd) the jinhone Khuda par iman rakh kar azeem pehalwan Joliath (Goliath) ko haraya. Unhone Zaboor (Psalms) ki bohot si kitabein likhin. Yesu Masih unhi ki nasal se paida hue."
+  },
+  {
+    keywords: ["abraham", "ibrahim"],
+    answer: "Ibrahim (Abraham) ko imandaron ka baap (Father of Faith) kaha jata hai. Khuda ne unse wada kiya tha ke unki nasal se azeem qomein paida hongi. Unka imaan itna mazboot tha ke wo apne betay Ishaq ko qurban karne ke liye bhi tayyar the jab Khuda ne unhe azmaya."
+  },
+  {
+    keywords: ["paul", "paulus", "khat", "khatoot"],
+    answer: "Paulus Rasool (Apostle Paul) pehle masihiyon par zulm karte the, lekin Yesu Masih ke darshan ke baad wo ibtadai kalisiya ke sabse bade mubashir (evangelist) ban gaye. Unhone Naye Ahd-Name (New Testament) ki zyada tar kitabein (khatoot / epistles) likhin."
+  },
+  {
+    keywords: ["genesis", "paidaish"],
+    answer: "Paidaish (Genesis) Bible ki pehli kitab hai jo Moosa ne likhi. Isme duniya ki takhleeq (creation), Adam aur Hawa, Nooh ka toofan, aur Ibrahim, Ishaq, Yakoob, aur Yousuf ki kahani shamil hai."
+  },
+  {
+    keywords: ["revelation", "mukashfa"],
+    answer: "Mukashfa (Revelation) Bible ki aakhri kitab hai jo Yohanna Rasool (Apostle John) ne likhi. Isme aakhri zamane ki nishaniyan, Yesu Masih ki dusri aamad (Second Coming), aur naye aasman aur nayi zameen ka zikr hai."
+  },
+  {
+    keywords: ["sin", "gunah", "salvation", "najat", "bakhshish", "maafi"],
+    answer: "Bible batati hai ke sabne gunah kiya hai aur Khuda ke jalal se mehroom hain. Lekin najat (Salvation) Khuda ka muft inaam hai jo sirf Yesu Masih par iman lane se milti hai, kyunki unhone humare gunahon ki qeemat chuka di hai."
+  },
+];
 
 const QUICK_REPLIES = [
   "BTL TV kya hai?",
-  "Live Support / WhatsApp",
+  "BTL Shows",
+  "Urdu Audio Bible",
   "Bible History",
-  "Bible School",
+  "Yesu Masih",
+  "Live Support",
 ];
 
 export default function Chatbot() {
@@ -42,7 +132,7 @@ export default function Chatbot() {
     {
       id: "welcome",
       sender: "bot",
-      text: "Khush Amdeed! Main BTL TV ka AI Assistant hoon. Main aapki kya madad kar sakta hoon?",
+      text: "Khush Amdeed! Main BTL TV ka Assistant hoon. Aap mujhse BTL TV, humare Shows, Audio Bible, ya Bible aur Christian History ke baare mein kuch bhi pooch sakte hain!",
     },
   ]);
   const [input, setInput] = useState("");
@@ -66,42 +156,37 @@ export default function Chatbot() {
     // Simulate thinking delay
     setTimeout(() => {
       generateResponse(text);
-    }, 600);
+    }, 500);
   };
 
   const generateResponse = (text: string) => {
     const lowerText = text.toLowerCase();
     let botReply = "";
 
-    // Live Support / Human Help
-    if (lowerText.includes("support") || lowerText.includes("human") || lowerText.includes("live") || lowerText.includes("contact") || lowerText.includes("whatsapp")) {
-      botReply = "Agar aap humari support team ya pastors se baat karna chahte hain, toh kripya Contact page par jayen ya humein WhatsApp karein: <br/><br/><a href='/contact' class='text-btl-red underline font-bold'>Contact Page Par Jayen</a>";
+    // Greetings
+    if (lowerText.match(/^(hi|hello|salam|assalam|hey|hy|helloo)/)) {
+      botReply = "Salam! Main aapki kya madad kar sakta hoon? Aap mujhse Bible ki tareekh ya BTL TV ke programs ke bare mein pooch sakte hain.";
+    } 
+    // Thanks
+    else if (lowerText.includes("thanks") || lowerText.includes("shukriya") || lowerText.includes("thank you")) {
+      botReply = "Khuda aapko barkat de! (God bless you!) Aur koi sawal ho toh zaroor poochein.";
     }
-    // BTL TV Info
-    else if (lowerText.includes("btl tv") || lowerText.includes("about")) {
-      botReply = BTL_INFO.about;
-    } else if (lowerText.includes("bible school") || lowerText.includes("course") || lowerText.includes("certificate")) {
-      botReply = BTL_INFO.school;
-    } else if (lowerText.includes("donate") || lowerText.includes("fund") || lowerText.includes("help")) {
-      botReply = BTL_INFO.donate;
-    }
-    // Bible / History
-    else if (lowerText.includes("bible history") || lowerText.includes("khat e muqaddas") || (lowerText.includes("history") && lowerText.includes("bible"))) {
-      botReply = BIBLE_HISTORY.bible + "<br/><br/>Aap 'Old Testament' ya 'New Testament' ke baare mein pooch sakte hain.";
-    } else if (lowerText.includes("old testament") || lowerText.includes("purana")) {
-      botReply = BIBLE_HISTORY.oldTestament;
-    } else if (lowerText.includes("new testament") || lowerText.includes("naya")) {
-      botReply = BIBLE_HISTORY.newTestament;
-    } else if (lowerText.includes("jesus") || lowerText.includes("yesu") || lowerText.includes("masih") || lowerText.includes("eesa")) {
-      botReply = BIBLE_HISTORY.jesus;
-    } else if (lowerText.includes("moses") || lowerText.includes("moosa")) {
-      botReply = BIBLE_HISTORY.moses;
-    } else if (lowerText.includes("david") || lowerText.includes("dawood")) {
-      botReply = BIBLE_HISTORY.david;
-    }
-    // Fallback
+    // Main Knowledge Base Search Engine
     else {
-      botReply = "Maaf kijiye, mujhe is topic ki zyada maloomat nahi hai. Main BTL TV aur Bible history ke baare mein bata sakta hoon. Agar aap kisi insaan se baat karna chahte hain toh 'Live Support' likhein.";
+      let foundMatch = false;
+      // Find the first matching knowledge base entry
+      for (const entry of KNOWLEDGE_BASE) {
+        if (entry.keywords.some((kw) => lowerText.includes(kw))) {
+          botReply = entry.answer;
+          foundMatch = true;
+          break; // Stop at first match to avoid multiple overlapping answers
+        }
+      }
+
+      // If absolutely no match found
+      if (!foundMatch) {
+        botReply = "Acha sawal hai! Lekin meri memory mein is waqt iska jawab nahi hai. Main Bible, Anbiya (Prophets), BTL TV ke Shows, aur Live TV ke baare mein bohot kuch janta hoon. Aap 'Moosa', 'Dawood', 'Naya Ahd-nama' ya 'BTL Shows' type karke dekhein. Agar aap kisi insaan se baat karna chahte hain toh 'Live Support' likhein.";
+      }
     }
 
     setMessages((prev) => [
@@ -119,9 +204,9 @@ export default function Chatbot() {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 z-[9999] h-14 w-14 rounded-full bg-btl-red text-white shadow-xl shadow-btl-red/30 flex items-center justify-center transition-transform ${isOpen ? 'hidden' : 'flex'}`}
+        className={`fixed bottom-6 right-6 z-[9999] h-16 w-16 rounded-full bg-black border-2 border-btl-red text-white shadow-xl shadow-btl-red/40 flex items-center justify-center transition-transform ${isOpen ? 'hidden' : 'flex'} overflow-hidden p-2`}
       >
-        <MessageCircle className="h-6 w-6" />
+        <img src="/images/logo/btl-logo.webp" alt="Chat" className="w-full h-full object-contain" />
       </motion.button>
 
       {/* Chat Window */}
@@ -137,8 +222,8 @@ export default function Chatbot() {
             {/* Header */}
             <div className="bg-gradient-to-r from-btl-red-dark to-btl-red p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="bg-white/20 p-2 rounded-full">
-                  <Bot className="h-5 w-5 text-white" />
+                <div className="bg-black p-1.5 rounded-full border border-white/20 h-10 w-10 flex items-center justify-center overflow-hidden shrink-0">
+                  <img src="/images/logo/btl-logo.webp" alt="BTL Logo" className="w-full h-full object-contain" />
                 </div>
                 <div>
                   <h3 className="font-bold text-white leading-tight">BTL TV Assistant</h3>
@@ -147,7 +232,7 @@ export default function Chatbot() {
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-white/80 hover:text-white p-1 hover:bg-white/10 rounded-full transition-colors"
+                className="text-white/80 hover:text-white p-1 hover:bg-white/10 rounded-full transition-colors shrink-0"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -160,8 +245,8 @@ export default function Chatbot() {
                   key={msg.id}
                   className={`flex gap-2 max-w-[85%] ${msg.sender === "user" ? "ml-auto flex-row-reverse" : "mr-auto"}`}
                 >
-                  <div className={`shrink-0 h-8 w-8 rounded-full flex items-center justify-center ${msg.sender === "user" ? "bg-white/10" : "bg-btl-red/20"}`}>
-                    {msg.sender === "user" ? <User className="h-4 w-4 text-white" /> : <Bot className="h-4 w-4 text-btl-red" />}
+                  <div className={`shrink-0 h-8 w-8 rounded-full flex items-center justify-center overflow-hidden ${msg.sender === "user" ? "bg-white/10" : "bg-black border border-white/10 p-1"}`}>
+                    {msg.sender === "user" ? <User className="h-4 w-4 text-white" /> : <img src="/images/logo/btl-logo.webp" alt="BTL Logo" className="w-full h-full object-contain" />}
                   </div>
                   <div
                     className={`p-3 rounded-2xl text-sm leading-relaxed ${
