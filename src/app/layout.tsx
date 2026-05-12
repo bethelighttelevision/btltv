@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import Preloader from "@/components/Preloader";
+import Chatbot from "@/components/Chatbot";
 import Script from "next/script";
 
 const geistSans = Geist({
@@ -149,6 +150,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Preloader />
+          <Chatbot />
           {children}
           <Toaster />
         </ThemeProvider>
