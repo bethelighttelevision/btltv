@@ -806,25 +806,27 @@ const BIBLE_BOOKS = [
   { id: "rev", name: "Revelation", nameUr: "مکاشفہ", chapters: 22, testament: "NT" },
 ];
 
-// Map our book IDs to GBC Pakistan Urdu audio Bible URL slugs
-// Source: Grace Bible Church Pakistan (gbcpakistan.org) - Free Urdu Audio Bible MP3s
-const GBC_AUDIO_MAP: Record<string, string> = {
-  gen: "Genesis", exo: "Exodus", lev: "Leviticus", num: "Numbers", deu: "Deuteronomy",
-  jos: "Joshua", jdg: "Judges", rut: "Ruth",
-  "1sa": "I_Samuel", "2sa": "II_Samuel", "1ki": "I_Kings", "2ki": "II_Kings",
-  "1ch": "I_Chronicles", "2ch": "II_Chronicles", ezr: "Ezra", neh: "Nehemiah", est: "Esther",
-  job: "Job", psa: "Psalms", pro: "Proverbs", ecc: "Ecclesiastes", sos: "Song_of_Solomon",
-  isa: "Isaiah", jer: "Jeremiah", lam: "Lamentations", eze: "Ezekiel", dan: "Daniel",
-  hos: "Hosea", jol: "Joel", amo: "Amos", oba: "Obadiah", jon: "Jonah",
-  mic: "Micah", nah: "Nahum", hab: "Habakkuk", zep: "Zephaniah", hag: "Haggai",
-  zec: "Zechariah", mal: "Malachi",
-  mat: "Mathew", mrk: "Mark", luk: "Luke", jhn: "John", act: "Acts",
-  rom: "Romans", "1co": "I_Corinthians", "2co": "II_Corinthians", gal: "Galatians", eph: "Ephesians",
-  php: "Philippians", col: "Colossians", "1th": "I_Thessalonians", "2th": "II_Thessalonians",
-  "1ti": "I_Timothy", "2ti": "II_Timothy", tit: "Titus", phm: "Philemon", heb: "Hebrews",
-  jas: "James", "1pe": "I_Peter", "2pe": "II_Peter", "1jn": "I_John", "2jn": "II_John",
-  "3jn": "III_John", jud: "Jude", rev: "Revelation",
+// Map book IDs to Internet Archive (bible_Audio_Urduirvurd) folder names
+// Source: https://archive.org/details/bible_Audio_Urduirvurd — Full Urdu Bible, Public Domain
+const ARCHIVE_AUDIO_MAP: Record<string, string> = {
+  gen: "genesis", exo: "exodus", lev: "leviticus", num: "numbers", deu: "deuteronomy",
+  jos: "joshua", jdg: "judges", rut: "ruth",
+  "1sa": "1samuel", "2sa": "2samuel", "1ki": "1kings", "2ki": "2kings",
+  "1ch": "1chronicles", "2ch": "2chronicles", ezr: "ezra", neh: "nehemiah", est: "esther",
+  job: "job", psa: "psalms", pro: "proverbs", ecc: "ecclesiastes", sos: "songofsolomon",
+  isa: "isaiah", jer: "jeremiah", lam: "lamentations", eze: "ezekiel", dan: "daniel",
+  hos: "hosea", jol: "joel", amo: "amos", oba: "obadiah", jon: "jonah",
+  mic: "micah", nah: "nahum", hab: "habakkuk", zep: "zephaniah", hag: "haggai",
+  zec: "zechariah", mal: "malachi",
+  mat: "matthew", mrk: "mark", luk: "luke", jhn: "john", act: "acts",
+  rom: "romans", "1co": "1corinthians", "2co": "2corinthians", gal: "galatians", eph: "ephesians",
+  php: "philippians", col: "colossians", "1th": "1thessalonians", "2th": "2thessalonians",
+  "1ti": "1timothy", "2ti": "2timothy", tit: "titus", phm: "philemon", heb: "hebrews",
+  jas: "james", "1pe": "1peter", "2pe": "2peter", "1jn": "1john", "2jn": "2john",
+  "3jn": "3john", jud: "jude", rev: "revelation",
 };
+// Archive.org base URL for the Urdu Bible audio collection
+const ARCHIVE_BASE = "https://ia902908.us.archive.org/16/items/bible_Audio_Urduirvurd";
 
 function UrduBiblePlayer() {
   const [selectedBook, setSelectedBook] = useState(BIBLE_BOOKS[39]); // Matthew by default
@@ -839,9 +841,12 @@ function UrduBiblePlayer() {
   const [audioError, setAudioError] = useState(false);
   const retryCountRef = useRef(0);
 
-  // Helper to get audio URL for any book/chapter
-  const getAudioUrl = (bookId: string, chapter: number) =>
-    `https://www.gbcpakistan.org/mp3/urdu_bible/${GBC_AUDIO_MAP[bookId]}${chapter}.mp3`;
+  // Helper to get audio URL — uses Internet Archive Urdu Bible collection
+  const getAudioUrl = (bookId: string, chapter: number) => {
+    const folder = ARCHIVE_AUDIO_MAP[bookId];
+    const chNum = String(chapter).padStart(3, "0");
+    return `${ARCHIVE_BASE}/${folder}/${chNum}.mp3`;
+  };
 
   // Core play function - with robust retry logic
   const loadAndPlay = useCallback((bookId: string, chapter: number) => {
@@ -961,99 +966,136 @@ function UrduBiblePlayer() {
   const ntCount = 27; // New Testament has 27 books
 
   return (
-    <div className="w-full max-w-4xl mx-auto rounded-3xl bg-[#111111] shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-white/5 overflow-hidden flex flex-col md:flex-row relative group">
+    <div className="w-full max-w-5xl mx-auto rounded-3xl overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.9)] border border-white/5 flex flex-col lg:flex-row relative">
 
-      {/* Ambient glowing background inside the player */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-btl-red/10 blur-[100px] pointer-events-none transition-opacity duration-700 opacity-50 group-hover:opacity-100"></div>
+      {/* ── LEFT PANEL: Player Controls ──────────────────────────── */}
+      <div className="relative lg:w-[340px] flex-shrink-0 bg-gradient-to-br from-[#0f0f0f] via-[#1a0505] to-[#0f0f0f] p-7 flex flex-col justify-between z-10 border-b lg:border-b-0 lg:border-r border-white/5">
 
-      {/* Main Player Area */}
-      <div className="flex-1 p-6 md:p-8 flex flex-col justify-between relative z-10 border-b md:border-b-0 md:border-r border-white/5">
+        {/* Ambient glow */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(229,9,20,0.12),transparent_70%)] pointer-events-none" />
 
         {/* Book Info */}
-        <div className="mb-8">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/5 border border-white/10 mb-4 shadow-sm">
-            <span className="relative flex h-1.5 w-1.5">
-              {(isPlaying || audioLoading) && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-btl-red opacity-75"></span>}
-              <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${isPlaying || audioLoading ? 'bg-btl-red' : 'bg-gray-500'}`}></span>
-            </span>
-            <span className="text-[10px] text-gray-300 font-bold uppercase tracking-widest">{selectedBook.testament === "OT" ? "Old Testament" : "New Testament"}</span>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight drop-shadow-md mb-1">{selectedBook.name}</h2>
-          <h3 className="text-xl text-gray-400 font-urdu drop-shadow-sm mb-2" dir="rtl">{selectedBook.nameUr}</h3>
-          <p className="text-sm text-btl-red font-medium tracking-wide">Chapter {selectedChapter} <span className="text-gray-600">/ {selectedBook.chapters}</span></p>
-        </div>
-
-        {/* Progress Bar - Netflix Style */}
-        <div className="mb-6 space-y-2">
-          <div
-            className="w-full h-2 bg-white/10 rounded-full cursor-pointer relative overflow-hidden group/bar"
-            onClick={seekTo}
-          >
-            {/* Hover preview bar (optional, keeping it simple) */}
-            <div
-              className="absolute top-0 left-0 h-full bg-btl-red rounded-full transition-all duration-100 ease-linear shadow-[0_0_10px_rgba(229,9,20,0.5)]"
-              style={{ width: `${progress}%` }}
-            >
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 h-4 w-4 bg-white rounded-full shadow-lg scale-0 group-hover/bar:scale-100 transition-transform origin-center translate-x-1/2" />
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-5">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
+              <span className="relative flex h-2 w-2">
+                {(isPlaying || audioLoading) && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-btl-red opacity-75" />}
+                <span className={`relative inline-flex rounded-full h-2 w-2 ${isPlaying || audioLoading ? 'bg-btl-red' : 'bg-gray-600'}`} />
+              </span>
+              <span className="text-[10px] text-gray-300 font-bold uppercase tracking-[0.15em]">
+                {selectedBook.testament === "OT" ? "Old Testament" : "New Testament"}
+              </span>
             </div>
           </div>
-          <div className="flex justify-between text-[11px] font-medium text-gray-500 font-mono tracking-wider">
+
+          <h2 className="text-4xl font-black text-white tracking-tight leading-none mb-1">
+            {selectedBook.name}
+          </h2>
+          <h3 className="text-lg text-gray-500 font-urdu mb-4 leading-tight" dir="rtl">
+            {selectedBook.nameUr}
+          </h3>
+
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-btl-red/10 border border-btl-red/20">
+            <span className="text-btl-red font-bold text-sm">Chapter {selectedChapter}</span>
+            <span className="text-gray-600 text-xs">/ {selectedBook.chapters}</span>
+          </div>
+        </div>
+
+        {/* Waveform visualizer (decorative bars) */}
+        <div className="relative z-10 my-5 flex items-end justify-center gap-[3px] h-8">
+          {[...Array(22)].map((_, i) => {
+            const baseH = 4 + Math.abs(Math.sin(i * 0.7)) * 20;
+            return (
+              <div
+                key={i}
+                className={`w-[3px] rounded-full transition-colors duration-300 ${isPlaying ? 'bg-btl-red/70' : 'bg-white/10'}`}
+                style={{ height: `${baseH}px` }}
+              />
+            );
+          })}
+        </div>
+
+        {/* Progress Bar */}
+        <div className="relative z-10 mb-5 space-y-2">
+          <div
+            className="w-full h-1.5 bg-white/10 rounded-full cursor-pointer relative group/bar"
+            onClick={seekTo}
+          >
+            <div
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-btl-red to-[#ff4444] rounded-full transition-all duration-100 ease-linear shadow-[0_0_8px_rgba(229,9,20,0.6)]"
+              style={{ width: `${progress}%` }}
+            >
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 h-3.5 w-3.5 bg-white rounded-full shadow-lg scale-0 group-hover/bar:scale-100 transition-transform origin-center translate-x-1/2 border-2 border-btl-red" />
+            </div>
+          </div>
+          <div className="flex justify-between text-[10px] font-mono font-medium text-gray-600 tracking-wider">
             <span>{formatTime(audioRef.current?.currentTime || 0)}</span>
             <span>{formatTime(duration)}</span>
           </div>
         </div>
 
         {/* Controls */}
-        <div className="flex items-center justify-center gap-6">
+        <div className="relative z-10 flex items-center justify-center gap-5">
           <button
             disabled={selectedChapter <= 1}
             onClick={() => skipChapter(-1)}
-            className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="h-10 w-10 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
           >
-            <ChevronLeft className="h-8 w-8" />
+            <ChevronLeft className="h-6 w-6" />
           </button>
 
           <button
-            className={`h-16 w-16 rounded-full flex items-center justify-center transition-all duration-300 ${isPlaying
+            className={`h-16 w-16 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg ${
+              isPlaying
                 ? "bg-white text-black hover:scale-105"
                 : audioError
-                  ? "bg-red-900/50 text-red-500 border border-red-500/50 hover:bg-red-900/80"
-                  : "bg-btl-red text-white hover:bg-[#ff1a25] hover:scale-105 hover:shadow-[0_0_20px_rgba(229,9,20,0.5)]"
-              }`}
+                  ? "bg-red-900/50 text-red-400 border border-red-500/50 hover:bg-red-900/70"
+                  : "bg-btl-red text-white hover:bg-[#ff1a25] hover:scale-110 shadow-[0_0_20px_rgba(229,9,20,0.4)] hover:shadow-[0_0_35px_rgba(229,9,20,0.7)]"
+            }`}
             onClick={audioError ? playAudio : isPlaying ? pauseAudio : playAudio}
             disabled={audioLoading && !audioError}
           >
             {audioLoading && !audioError ? (
               <div className="h-6 w-6 border-2 border-current border-t-transparent rounded-full animate-spin" />
             ) : audioError ? (
-              <RotateCcw className="h-6 w-6" /> // Icon for retry
+              <RotateCcw className="h-5 w-5" />
             ) : isPlaying ? (
               <Pause className="h-7 w-7 fill-current" />
             ) : (
-              <Play className="h-7 w-7 fill-current ml-1" />
+              <Play className="h-7 w-7 fill-current ml-0.5" />
             )}
           </button>
 
           <button
             disabled={selectedChapter >= selectedBook.chapters}
             onClick={() => skipChapter(1)}
-            className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="h-10 w-10 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
           >
-            <ChevronRight className="h-8 w-8" />
+            <ChevronRight className="h-6 w-6" />
           </button>
         </div>
 
-        {/* Status Message */}
-        <div className="h-6 mt-4 text-center">
+        {/* Status messages */}
+        <div className="relative z-10 h-8 mt-4 text-center">
           <AnimatePresence>
             {audioError && (
-              <motion.p
-                initial={{ opacity: 0, y: 5 }}
+              <motion.div
+                initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="text-xs text-red-400 font-medium"
               >
-                Network timeout. Click retry to attempt playing again.
+                <p className="text-xs text-red-400 font-medium">Audio unavailable — tap retry.</p>
+                <p className="text-[10px] text-gray-600 font-urdu mt-0.5" dir="rtl">دوبارہ کوشش کریں</p>
+              </motion.div>
+            )}
+            {audioLoading && !audioError && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-xs text-gray-500"
+              >
+                Loading chapter {selectedChapter}…
               </motion.p>
             )}
           </AnimatePresence>
@@ -1084,7 +1126,6 @@ function UrduBiblePlayer() {
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={handleLoadedMetadata}
           onError={() => {
-            // Auto-retry on error (up to 3 times)
             if (retryCountRef.current < 3) {
               retryCountRef.current++;
               const audio = audioRef.current;
@@ -1092,7 +1133,7 @@ function UrduBiblePlayer() {
                 setTimeout(() => {
                   audio.load();
                   audio.play().catch(() => setAudioError(true));
-                }, retryCountRef.current * 500);
+                }, retryCountRef.current * 800);
               }
             } else {
               setAudioError(true);
@@ -1101,76 +1142,96 @@ function UrduBiblePlayer() {
         />
       </div>
 
-      {/* Chapter Selector */}
-      <div>
-        <p className="text-xs font-medium text-muted-foreground mb-2">Select Chapter</p>
-        <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
-          {Array.from({ length: selectedBook.chapters }, (_, i) => i + 1).map((ch) => (
-            <button
-              key={ch}
-              onClick={() => {
-                setSelectedChapter(ch);
-                setProgress(0);
-                setAudioError(false);
-                retryCountRef.current = 0;
-                // Auto-play the selected chapter
-                loadAndPlay(selectedBook.id, ch);
-              }}
-              className={`min-w-[32px] h-7 rounded text-[11px] font-medium transition-all ${ch === selectedChapter
-                  ? "bg-btl-red text-white"
-                  : "bg-btl-dark/50 text-muted-foreground hover:bg-btl-red/20 hover:text-btl-red"
-                }`}
-            >
-              {ch}
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* ── RIGHT PANEL: Book + Chapter Selectors ─────────────────── */}
+      <div className="flex-1 bg-[#0d0d0d] flex flex-col">
 
-      {/* Book Selector */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <div className="flex bg-btl-dark/60 rounded-lg p-0.5 border border-border/20">
-            <button
-              onClick={() => setTestamentFilter("OT")}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${testamentFilter === "OT" ? "bg-btl-red text-white" : "text-muted-foreground hover:text-foreground"
-                }`}
-            >
-              Old Testament ({otCount})
-            </button>
+        {/* Testament Toggle + Search */}
+        <div className="p-4 border-b border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="flex bg-[#1a1a1a] rounded-xl p-1 border border-white/5 gap-1">
             <button
               onClick={() => setTestamentFilter("NT")}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${testamentFilter === "NT" ? "bg-btl-red text-white" : "text-muted-foreground hover:text-foreground"
-                }`}
+              className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                testamentFilter === "NT"
+                  ? "bg-btl-red text-white shadow-[0_0_10px_rgba(229,9,20,0.3)]"
+                  : "text-gray-500 hover:text-white"
+              }`}
             >
-              New Testament ({ntCount})
+              New (27)
+            </button>
+            <button
+              onClick={() => setTestamentFilter("OT")}
+              className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                testamentFilter === "OT"
+                  ? "bg-btl-red text-white shadow-[0_0_10px_rgba(229,9,20,0.3)]"
+                  : "text-gray-500 hover:text-white"
+              }`}
+            >
+              Old (39)
             </button>
           </div>
-          <div className="flex-1 relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-600" />
             <Input
               placeholder="Search book..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-btl-dark/50 border-border/30 h-8 text-xs pl-8"
+              className="bg-[#1a1a1a] border-white/5 h-10 text-xs pl-9 rounded-xl text-gray-300 placeholder:text-gray-600"
             />
           </div>
         </div>
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1.5 max-h-48 overflow-y-auto">
-          {filteredBooks.map((book) => (
-            <button
-              key={book.id}
-              onClick={() => handleBookSelect(book)}
-              className={`p-2 rounded-lg text-left transition-all ${book.id === selectedBook.id
-                  ? "bg-btl-red text-white"
-                  : "bg-btl-dark/40 hover:bg-btl-dark/70 text-muted-foreground hover:text-foreground"
+
+        {/* Books Grid */}
+        <div className="flex-1 p-4 overflow-y-auto" style={{ maxHeight: "220px" }}>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-3">Select Book</p>
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5">
+            {filteredBooks.map((book) => (
+              <button
+                key={book.id}
+                onClick={() => handleBookSelect(book)}
+                className={`p-2.5 rounded-xl text-left transition-all duration-200 border ${
+                  book.id === selectedBook.id
+                    ? "bg-btl-red/15 border-btl-red/50 shadow-[0_0_12px_rgba(229,9,20,0.2)]"
+                    : "bg-white/[0.03] border-white/5 hover:bg-white/[0.07] hover:border-white/15"
                 }`}
-            >
-              <p className="text-[11px] font-medium truncate">{book.name}</p>
-              <p className="text-[9px] opacity-70 truncate" dir="rtl">{book.nameUr}</p>
-            </button>
-          ))}
+              >
+                <p className={`text-[11px] font-semibold truncate leading-tight ${book.id === selectedBook.id ? "text-btl-red" : "text-gray-300"}`}>
+                  {book.name}
+                </p>
+                <p className="text-[9px] text-gray-600 truncate mt-0.5" dir="rtl">{book.nameUr}</p>
+              </button>
+            ))}
+          </div>
         </div>
+
+        {/* Chapter Grid */}
+        <div className="border-t border-white/5 p-4">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-3">
+            Chapter — <span className="text-btl-red">{selectedBook.chapters} total</span>
+          </p>
+          <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1">
+            {Array.from({ length: selectedBook.chapters }, (_, i) => i + 1).map((ch) => (
+              <button
+                key={ch}
+                onClick={() => {
+                  setSelectedChapter(ch);
+                  setProgress(0);
+                  setDuration(0);
+                  setAudioError(false);
+                  retryCountRef.current = 0;
+                  loadAndPlay(selectedBook.id, ch);
+                }}
+                className={`min-w-[34px] h-8 px-2 rounded-lg text-[11px] font-bold transition-all duration-150 ${
+                  ch === selectedChapter
+                    ? "bg-btl-red text-white shadow-[0_0_10px_rgba(229,9,20,0.4)] scale-110"
+                    : "bg-white/5 text-gray-500 hover:bg-btl-red/20 hover:text-btl-red hover:scale-105"
+                }`}
+              >
+                {ch}
+              </button>
+            ))}
+          </div>
+        </div>
+
       </div>
     </div>
   );
