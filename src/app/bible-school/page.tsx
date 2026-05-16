@@ -82,7 +82,7 @@ export default function BibleSchool() {
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
 
             <div className="h-48 relative overflow-hidden flex items-center justify-center">
-              <img src="https://images.unsplash.com/photo-1519011985187-444d62641929?q=80&w=2000&auto=format&fit=crop" className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:scale-110 transition-transform duration-700 ease-in-out" />
+              <img src="/images/bible-school/Chapman%20Banner.png" className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition-transform duration-700 ease-in-out" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#111111] to-transparent" />
               <BookOpen className="h-16 w-16 text-btl-red/80 drop-shadow-[0_0_15px_rgba(229,9,20,0.5)] relative z-10 group-hover:-translate-y-2 transition-transform duration-500" />
               <div className="absolute top-4 right-4 bg-btl-red/90 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-full border border-white/20 shadow-lg">
@@ -124,7 +124,7 @@ export default function BibleSchool() {
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
 
             <div className="h-48 relative overflow-hidden flex items-center justify-center">
-              <img src="https://images.unsplash.com/photo-1478147427282-58a87a120781?q=80&w=2000&auto=format&fit=crop" className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:scale-110 transition-transform duration-700 ease-in-out" />
+              <img src="/images/bible-school/Bible%20Basics%20Banner.png" className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition-transform duration-700 ease-in-out" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#111111] to-transparent" />
               <BookOpen className="h-16 w-16 text-white/50 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] relative z-10 group-hover:-translate-y-2 transition-transform duration-500 group-hover:text-white" />
               <div className="absolute top-4 right-4 bg-white/10 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full border border-white/20 shadow-lg">

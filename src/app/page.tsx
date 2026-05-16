@@ -90,6 +90,7 @@ interface TeamMember {
   image: string;
   description?: string;
   group: string;
+  objectPosition?: string;
 }
 
 // PWA beforeinstallprompt event type
@@ -448,9 +449,8 @@ const TEAM_GROUPS = [
     title: "Leadership",
     icon: Crown,
     members: [
-      { name: "Gasper Daniel", role: "CEO & Founder", image: "/images/team/gasper-daniel.webp" },
-      { name: "Sumble Noreen", role: "Vice President", image: "/images/team/sumble-noreen.webp" },
-      { name: "Sonal Gasper", role: "Administrator", image: "/images/team/sonal-gasper.webp" },
+      { name: "Gasper Daniel", role: "CEO & Founder", image: "/images/team/Gasper%20Daniel%20CEO%20&%20Founder.png" },
+      { name: "Sumble Noreen", role: "Vice President", image: "/images/team/Sumble%20Noreen%20Vice%20President.png" },
       { name: "Sahir Alam", role: "Head of Audio & Video", image: "/images/team/sahir-alam.webp" },
     ],
   },
@@ -458,11 +458,10 @@ const TEAM_GROUPS = [
     title: "Office",
     icon: Briefcase,
     members: [
-      { name: "Sonal Sahir", role: "Head of Department", image: "/images/team/sonal-sahir.webp" },
+      { name: "Karal Yohana", role: "Head of Department", image: "/images/team/Karal%20Yohana%20Head%20of%20Department.png" },
       { name: "Nayyar Noel", role: "Co-Ordinator", image: "/images/team/nayyar-noel.webp" },
-      { name: "Victor", role: "Web Developer", image: "/images/team/victor.webp" },
-      { name: "Khisal Daniel", role: "Director of Photography", image: "/images/team/khisal-daniel.webp" },
-      { name: "Minahil Daniel", role: "Director of Photography", image: "/images/team/minahil-daniel.webp" },
+      { name: "Khisal Daniel", role: "Director of Photography", image: "/images/team/Khisal%20Daniel%20Director%20of%20Photography.png" },
+      { name: "Minahil Daniel", role: "Director of Photography", image: "/images/team/Minahil%20Daniel%20Director%20of%20Photography.png" },
     ],
   },
   {
@@ -470,7 +469,6 @@ const TEAM_GROUPS = [
     icon: Mic,
     members: [
       { name: "Watson Gill", role: "Host", image: "/images/team/watson-gill.webp" },
-      { name: "Inge", role: "Host", image: "/images/team/inge.webp" },
     ],
   },
   {
@@ -2341,7 +2339,7 @@ function TeamPage() {
                   className="cursor-default"
                 >
                   <div className="overflow-hidden rounded-lg bg-btl-card hover:ring-1 hover:ring-btl-red/30 transition-all">
-                    <div className="relative aspect-square overflow-hidden">
+                    <div className="relative aspect-square overflow-hidden" style={{ backgroundColor: 'white' }}>
                       <img
                         src={member.image}
                         alt={member.name}
