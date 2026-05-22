@@ -50,6 +50,8 @@ import {
   Disc3,
   RotateCcw,
   Pause,
+  Send,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -833,6 +835,7 @@ function UrduBiblePlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioLoading, setAudioLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [audioError, setAudioError] = useState(false);
   const retryCountRef = useRef(0);
@@ -841,7 +844,6 @@ function UrduBiblePlayer() {
   const getAudioUrl = (bookId: string, chapter: number) =>
     `https://www.gbcpakistan.org/mp3/urdu_bible/${GBC_AUDIO_MAP[bookId]}${chapter}.mp3`;
 
-  // Core play function - with robust retry logic
   const loadAndPlay = useCallback((bookId: string, chapter: number) => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -850,31 +852,45 @@ function UrduBiblePlayer() {
     retryCountRef.current = 0;
 
     const playAttempt = () => {
+      if (!audio) return;
       const url = getAudioUrl(bookId, chapter);
-      // Append a timestamp cache buster on retries to bypass broken browser caches
-      audio.src = retryCountRef.current > 0 ? `${url}?t=${Date.now()}` : url;
-      audio.load();
 
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            setIsPlaying(true);
-            setAudioLoading(false);
-            setAudioError(false);
-          })
-          .catch((err) => {
-            console.log("Audio play error:", err);
-            if (retryCountRef.current < 4) { // Increased to 4 retries
-              retryCountRef.current++;
-              // Exponential backoff for retries
-              setTimeout(playAttempt, retryCountRef.current * 1000);
-            } else {
-              setAudioError(true);
+      const doPlay = () => {
+        const promise = audio.play();
+        if (promise !== undefined) {
+          promise
+            .then(() => {
+              setIsPlaying(true);
               setAudioLoading(false);
-            }
-          });
-      }
+              setAudioError(false);
+            })
+            .catch(() => {
+              if (retryCountRef.current < 4) {
+                retryCountRef.current++;
+                setTimeout(playAttempt, retryCountRef.current * 1000);
+              } else {
+                setAudioError(true);
+                setAudioLoading(false);
+              }
+            });
+        }
+      };
+
+      const onLoadError = () => {
+        if (retryCountRef.current < 4) {
+          retryCountRef.current++;
+          setTimeout(playAttempt, retryCountRef.current * 1000);
+        } else {
+          setAudioError(true);
+          setAudioLoading(false);
+        }
+      };
+
+      audio.oncanplay = doPlay;
+      audio.onloadeddata = doPlay;
+      audio.onerror = onLoadError;
+      audio.src = `${url}?t=${Date.now()}`;
+      audio.load();
     };
 
     playAttempt();
@@ -900,7 +916,10 @@ function UrduBiblePlayer() {
     retryCountRef.current = 0;
     if (audioRef.current) {
       audioRef.current.pause();
-      audioRef.current.src = "";
+      audioRef.current.oncanplay = null;
+      audioRef.current.onloadeddata = null;
+      audioRef.current.onerror = null;
+      audioRef.current.removeAttribute("src");
     }
   }, []);
 
@@ -908,6 +927,7 @@ function UrduBiblePlayer() {
     if (!audioRef.current) return;
     const cur = audioRef.current.currentTime;
     const dur = audioRef.current.duration || 0;
+    setCurrentTime(cur);
     setProgress(dur > 0 ? (cur / dur) * 100 : 0);
   };
 
@@ -1022,7 +1042,7 @@ function UrduBiblePlayer() {
             </div>
           </div>
           <div className="flex justify-between text-[10px] font-mono font-medium text-gray-600 tracking-wider">
-            <span>{formatTime(audioRef.current?.currentTime || 0)}</span>
+            <span>{formatTime(currentTime)}</span>
             <span>{formatTime(duration)}</span>
           </div>
         </div>
@@ -1096,7 +1116,7 @@ function UrduBiblePlayer() {
 
         <audio
           ref={audioRef}
-          preload="none"
+          preload="auto"
           onEnded={() => {
             setProgress(0);
             setDuration(0);
@@ -1109,7 +1129,7 @@ function UrduBiblePlayer() {
               if (nextBook) {
                 setSelectedBook(nextBook);
                 setSelectedChapter(1);
-                setTestamentFilter(nextBook.testament);
+                setTestamentFilter(nextBook.testament as "OT" | "NT");
                 loadAndPlay(nextBook.id, 1);
               } else {
                 setIsPlaying(false);
@@ -1118,20 +1138,6 @@ function UrduBiblePlayer() {
           }}
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={handleLoadedMetadata}
-          onError={() => {
-            if (retryCountRef.current < 3) {
-              retryCountRef.current++;
-              const audio = audioRef.current;
-              if (audio) {
-                setTimeout(() => {
-                  audio.load();
-                  audio.play().catch(() => setAudioError(true));
-                }, retryCountRef.current * 800);
-              }
-            } else {
-              setAudioError(true);
-            }
-          }}
         />
       </div>
 
@@ -1392,7 +1398,7 @@ function HomePage({
             transition={{ duration: 0.8 }}
             className="absolute inset-0"
           >
-            <img src={hero.image} alt={hero.title} width={1280} height={720} fetchPriority="high" decoding="async" className="w-full h-full object-cover" />
+            <img src={hero.image} alt={hero.title} width={1280} height={720} fetchPriority="high" decoding="async" className="w-full h-full object-cover object-center" />
           </motion.div>
         </AnimatePresence>
         <div className="hero-gradient absolute inset-0" />
@@ -1704,15 +1710,17 @@ function ShowsPage({
 
           <div className="flex flex-col md:flex-row gap-6">
             <div className="md:w-2/5 lg:w-1/3 shrink-0">
-              <div className="relative rounded-lg shadow-xl bg-btl-dark flex items-center justify-center overflow-hidden">
-                <img
-                  src={program.poster}
-                  alt={program.title}
-                  width={1280}
-                  height={720}
-                  loading="lazy"
-                  className="w-full object-contain max-h-[50vh]"
-                />
+              <div className="relative rounded-lg shadow-xl bg-btl-dark overflow-hidden">
+                <div className="aspect-[16/9] md:aspect-[4/3]">
+                  <img
+                    src={program.poster}
+                    alt={program.title}
+                    width={1280}
+                    height={720}
+                    loading="lazy"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
                 <div className="absolute bottom-3 left-3 right-3">
                   <Badge className="bg-btl-red/90 text-white text-xs font-bold mb-2">{program.category}</Badge>
@@ -2643,27 +2651,43 @@ function ReportsPage() {
 // ─── CONTACT PAGE ────────────────────────────────────────────────────
 function ContactPage() {
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
 
-  const WHATSAPP_NUMBER = "31685097840"; // Netherlands number with country code
-
-  const handleWhatsAppSend = (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !message.trim()) {
-      toast.error("Please fill in your name and message.");
+    if (!name.trim() || !email.trim() || !message.trim()) {
+      toast.error("Please fill in your name, email, and message.");
       return;
     }
-    // Build the WhatsApp message
-    const textParts = [
-      subject ? `*Subject: ${subject}*` : "",
-      `*Name:* ${name}`,
-      "",
-      message,
-    ].filter(Boolean).join("\n");
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(textParts)}`;
-    window.open(whatsappUrl, "_blank");
-    toast.success("Opening WhatsApp...");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    setSending(true);
+    try {
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("phone", phone);
+      formData.append("subject", subject || "General Inquiry");
+      formData.append("message", message);
+      formData.append("_template", "table");
+      const res = await fetch("https://formsubmit.co/ajax/admin@btl-tv.com", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) throw new Error("Send failed");
+      toast.success("Message sent successfully! We'll get back to you soon.");
+      setName(""); setEmail(""); setPhone(""); setSubject(""); setMessage("");
+    } catch {
+      toast.error("Failed to send message. Please try again later or email us directly.");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -2680,7 +2704,7 @@ function ContactPage() {
           >
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="h-px w-12 bg-btl-red/50" />
-              <Phone className="h-7 w-7 text-btl-red" />
+              <Mail className="h-7 w-7 text-btl-red" />
               <div className="h-px w-12 bg-btl-red/50" />
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">Contact Us</h1>
@@ -2690,27 +2714,25 @@ function ContactPage() {
       </div>
 
       <div className="px-4 md:px-6 py-8 max-w-5xl mx-auto">
-        {/* WhatsApp Direct Chat - Primary CTA */}
+        {/* Email Contact Form - Primary CTA */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-6">
           <Card className="bg-btl-card border-btl-card-border overflow-hidden">
-            <div className="bg-gradient-to-r from-[#25D366]/15 via-[#25D366]/5 to-transparent p-4 md:p-5 border-b border-btl-card-border">
+            <div className="bg-gradient-to-r from-btl-red/10 via-btl-red/5 to-transparent p-4 md:p-5 border-b border-btl-card-border">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-[#25D366]/20 flex items-center justify-center">
-                  <svg viewBox="0 0 24 24" className="h-6 w-6 text-[#25D366]" fill="currentColor">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                  </svg>
+                <div className="h-10 w-10 rounded-lg bg-btl-red/20 flex items-center justify-center">
+                  <Mail className="h-5 w-5 text-btl-red" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-foreground">Chat on WhatsApp</h2>
-                  <p className="text-xs text-muted-foreground">Send us a message directly — we reply fast!</p>
+                  <h2 className="text-lg font-bold text-foreground">Send us an Email</h2>
+                  <p className="text-xs text-muted-foreground">Fill out the form and we'll reply within 24 hours</p>
                 </div>
               </div>
             </div>
             <CardContent className="p-5">
-              <form onSubmit={handleWhatsAppSend} className="space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <form onSubmit={handleEmailSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-foreground mb-2 block">Name *</label>
+                    <label className="text-sm font-medium text-foreground mb-1.5 block">Name *</label>
                     <Input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
@@ -2720,7 +2742,30 @@ function ContactPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-foreground mb-2 block">Subject</label>
+                    <label className="text-sm font-medium text-foreground mb-1.5 block">Email *</label>
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="your@email.com"
+                      className="bg-btl-dark/50 border-border/50 h-11"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-1.5 block">Phone (optional)</label>
+                    <Input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="+1 234 567 890"
+                      className="bg-btl-dark/50 border-border/50 h-11"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-1.5 block">Subject</label>
                     <Input
                       value={subject}
                       onChange={(e) => setSubject(e.target.value)}
@@ -2730,31 +2775,33 @@ function ContactPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Message *</label>
+                  <label className="text-sm font-medium text-foreground mb-1.5 block">Message *</label>
                   <Textarea
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="How can we help you?"
-                    className="bg-btl-dark/50 border-border/50 min-h-[140px] resize-none"
+                    className="bg-btl-dark/50 border-border/50 min-h-[120px] resize-none"
                     required
                   />
                 </div>
                 <Button
                   type="submit"
-                  className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold h-12 min-h-[44px] text-base"
+                  disabled={sending}
+                  className="w-full bg-btl-red hover:bg-btl-red/90 text-white font-semibold h-12 min-h-[44px] text-base"
                 >
-                  <svg viewBox="0 0 24 24" className="h-5 w-5 mr-2" fill="currentColor">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                  </svg>
-                  Send via WhatsApp
+                  {sending ? (
+                    <><Loader2 className="h-5 w-5 mr-2 animate-spin" /> Sending...</>
+                  ) : (
+                    <><Send className="h-5 w-5 mr-2" /> Send Message</>
+                  )}
                 </Button>
               </form>
 
-              {/* Quick WhatsApp button */}
+              {/* Quick WhatsApp link */}
               <div className="mt-4 pt-4 border-t border-border/20 text-center">
-                <p className="text-xs text-muted-foreground mb-3">Or chat directly without filling the form</p>
+                <p className="text-xs text-muted-foreground mb-3">Prefer instant messaging?</p>
                 <a
-                  href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                  href="https://wa.me/31685097840"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-[#25D366] hover:text-[#20bd5a] text-sm font-medium transition-colors"
@@ -2762,7 +2809,7 @@ function ContactPage() {
                   <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                   </svg>
-                  Open WhatsApp Chat →
+                  Chat on WhatsApp →
                 </a>
               </div>
             </CardContent>

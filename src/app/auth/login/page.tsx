@@ -2,21 +2,37 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Mail, Lock } from "lucide-react";
+import { ArrowLeft, Mail, Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    router.push("/bible-school/course");
+    setLoading(true);
+    setError("");
+
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    if (result?.error) {
+      setError("Invalid email or password. Please try again.");
+      setLoading(false);
+    } else {
+      router.push("/dashboard");
+    }
   };
 
   return (
@@ -33,7 +49,7 @@ export default function LoginPage() {
 
       <Link href="/bible-school" className="absolute top-6 left-6 z-20">
         <Button variant="ghost" className="text-white hover:bg-white/20">
-          <ArrowLeft className="mr-2 h-5 w-5" /> Back
+          <ArrowLeft className="mr-2 h-5 w-5" /> <span className="font-urdu">واپس</span>
         </Button>
       </Link>
 
@@ -53,6 +69,11 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-urdu text-center p-3 rounded-lg">
+              {error}
+            </div>
+          )}
           <div className="space-y-4 text-right">
             <div className="relative">
               <Input
@@ -62,6 +83,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="bg-black/50 border-white/20 text-white font-urdu text-right pr-12 h-12 rounded-lg focus:border-btl-red transition-colors"
                 required
+                disabled={loading}
               />
               <Mail className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 h-5 w-5" />
             </div>
@@ -74,14 +96,21 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="bg-black/50 border-white/20 text-white font-urdu text-right pr-12 h-12 rounded-lg focus:border-btl-red transition-colors"
                 required
+                disabled={loading}
               />
               <Lock className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 h-5 w-5" />
             </div>
           </div>
 
-          <Button type="submit" className="w-full h-12 bg-btl-red hover:bg-btl-red-dark text-white font-urdu text-lg rounded-lg transition-transform active:scale-95">
-            لاگ ان کریں
+          <Button type="submit" disabled={loading} className="w-full h-12 bg-btl-red hover:bg-btl-red-dark text-white font-urdu text-lg rounded-lg transition-transform active:scale-95 disabled:opacity-60">
+            {loading ? <><Loader2 className="h-5 w-5 ml-2 animate-spin inline" /> براہ کرم انتظار کریں</> : "لاگ ان کریں"}
           </Button>
+
+          <div className="text-center">
+            <Link href="/forgot-password" className="text-sm text-gray-400 hover:text-btl-red transition-colors font-urdu">
+              پاس ورڈ بھول گئے؟
+            </Link>
+          </div>
         </form>
 
         <div className="mt-8">
@@ -93,23 +122,13 @@ export default function LoginPage() {
           <div className="space-y-3">
             <Button
               type="button"
-              onClick={handleLogin}
+              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
               variant="outline"
+              disabled={loading}
               className="w-full h-12 bg-white text-black hover:bg-gray-100 font-urdu text-lg flex items-center justify-center gap-3 rounded-lg"
             >
               <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
               گوگل کے ساتھ جاری رکھیں
-            </Button>
-            
-            <Button
-              type="button"
-              onClick={handleLogin}
-              className="w-full h-12 bg-[#1877F2] hover:bg-[#166fe5] text-white font-urdu text-lg flex items-center justify-center gap-3 rounded-lg border-none"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-white">
-                <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
-              </svg>
-              فیس بک کے ساتھ جاری رکھیں
             </Button>
           </div>
         </div>

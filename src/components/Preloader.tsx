@@ -1,26 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, startTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Preloader() {
   const [show, setShow] = useState(false);
-  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
     const hasSeenPreloader = sessionStorage.getItem("btl-preloader-seen");
-    if (hasSeenPreloader) return; // Skip preloader on repeat visits in same session
-    
-    setShow(true);
+    if (hasSeenPreloader) return;
+
+    startTransition(() => setShow(true));
     const timer = setTimeout(() => {
-      setShow(false);
+      startTransition(() => setShow(false));
       sessionStorage.setItem("btl-preloader-seen", "true");
-    }, 2800); 
+    }, 2800);
     return () => clearTimeout(timer);
   }, []);
-
-  if (!isClient) return null;
 
   return (
     <AnimatePresence>

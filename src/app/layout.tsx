@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
+import NextAuthProvider from "@/components/NextAuthProvider";
 import Preloader from "@/components/Preloader";
 import Script from "next/script";
 
@@ -102,6 +103,8 @@ export default function RootLayout({
         <meta name="application-name" content="BTL TV" />
         <meta name="msapplication-TileColor" content="#0a0a0f" />
         <meta name="msapplication-tap-highlight" content="no" />
+        <link rel="indexnow" href="https://btl-tv.com/34ca8fee16d64bc4bb0eb2477b72a4ef.txt" />
+        <meta name="msvalidate.01" content={process.env.BING_VERIFICATION_CODE ?? "your-bing-verification-code-here"} />
       </head>
       <body
         suppressHydrationWarning
@@ -142,16 +145,18 @@ export default function RootLayout({
             `,
           }}
         />
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Preloader />
-          {children}
-          <Toaster />
-        </ThemeProvider>
+        <NextAuthProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Preloader />
+            {children}
+            <Toaster />
+          </ThemeProvider>
+        </NextAuthProvider>
       </body>
     </html>
   );
