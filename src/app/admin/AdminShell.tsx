@@ -80,7 +80,14 @@ export default function AdminShell({ children }: { children: ReactNode }) {
 
         {/* Content */}
         <main className="flex-1 p-4 md:p-8 pt-20 md:pt-8 pb-20 md:pb-8">
-          {children}
+          <div className="max-w-5xl mx-auto">
+            <div className="md:hidden mb-4">
+              <Link href="/bible-school" className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors">
+                <ArrowLeft className="h-4 w-4" /> Back to Main Site
+              </Link>
+            </div>
+            {children}
+          </div>
         </main>
       </div>
     </AdminGuard>

@@ -46,9 +46,6 @@ export const metadata: Metadata = {
   authors: [{ name: "BTL TV", url: "https://btl-tv.com" }],
   creator: "BTL TV",
   publisher: "Be The Light Television",
-  alternates: {
-    canonical: "https://btl-tv.com",
-  },
   icons: {
     icon: [
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
