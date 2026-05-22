@@ -44,3 +44,5 @@ prisma/*.db
 # dev logs
 dev.log
 server.log
+
+.vercel
