@@ -16,27 +16,6 @@ interface Course {
   _count: { lessons: number; enrollments: number };
 }
 
-const fallbackCourses = [
-  {
-    id: "chapman",
-    title: "Chapman",
-    _count: { lessons: 10, enrollments: 22 },
-    tag: "نیا کورس",
-    tagBg: "bg-btl-red/90",
-    image: "/images/bible-school/Chapman%20Banner.png",
-    description: "یہ 10 اسباق پر مشتمل ایک بہترین کورس ہے۔ ہر باب میں کچھ متن پڑھنے کو ہوتا ہے اور اس کے بارے میں کچھ سوالات ہوتے ہیں۔",
-  },
-  {
-    id: "biblbasics",
-    title: "BiblBasics",
-    _count: { lessons: 15, enrollments: 7 },
-    tag: "بنیادی تعلیم",
-    tagBg: "bg-white/10",
-    image: "/images/bible-school/Bible%20Basics%20Banner.png",
-    description: "یہ 15 اسباق پر مشتمل ہے۔ یہ آپ کو بائبل کی جھلکیاں اور آپ کے لیے خدا کا پیغام دکھائے گا۔",
-  },
-];
-
 const statsDef = [
   { icon: BookOpen, value: "courses", label: "کورسز" },
   { icon: Users, value: "users", label: "طلباء" },
@@ -48,24 +27,22 @@ export default function BibleSchool() {
   const { data: session } = useSession();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
-  const [liveStats, setLiveStats] = useState({ courses: 2, users: 29, lessons: 25 });
+  const [liveStats, setLiveStats] = useState({ courses: 0, users: 0, lessons: 0 });
 
   useEffect(() => {
     Promise.all([
       fetch("/api/courses").then((r) => r.json()),
       fetch("/api/stats/public").then((r) => r.json()),
     ]).then(([coursesData, statsData]) => {
-      if (Array.isArray(coursesData) && coursesData.length > 0) setCourses(coursesData);
+      if (Array.isArray(coursesData)) setCourses(coursesData);
       setLiveStats({
-        courses: statsData.courses || 2,
-        users: statsData.users || 29,
-        lessons: statsData.lessons || 25,
+        courses: statsData.courses || 0,
+        users: statsData.users || 0,
+        lessons: statsData.lessons || 0,
       });
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
-
-  const displayCourses = courses.length > 0 ? courses : fallbackCourses;
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white pb-32">
@@ -169,7 +146,7 @@ export default function BibleSchool() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {(displayCourses as any[]).map((course: any, i: number) => (
+            {(courses as any[]).map((course: any, i: number) => (
               <motion.div
                 key={course.id || i}
                 initial={{ opacity: 0, y: 30 }}
@@ -185,11 +162,6 @@ export default function BibleSchool() {
                     className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#111] to-transparent" />
-                  {course.tag && (
-                    <div className={`absolute top-4 right-4 ${course.tagBg} backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-full border border-white/10`}>
-                      {course.tag}
-                    </div>
-                  )}
                 </div>
 
                 <div className="p-6 text-right">
