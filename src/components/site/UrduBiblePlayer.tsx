@@ -9,8 +9,14 @@ import {
   Play,
   Pause,
   RotateCcw,
+  SkipBack,
+  SkipForward,
+  Volume2,
+  Volume1,
+  VolumeX,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const BIBLE_BOOKS = [
   { id: "gen", name: "Genesis", nameUr: "پیدائش", chapters: 50, testament: "OT" },
@@ -73,7 +79,7 @@ const BIBLE_BOOKS = [
   { id: "heb", name: "Hebrews", nameUr: "عبرانیوں", chapters: 13, testament: "NT" },
   { id: "jas", name: "James", nameUr: "یعقوب", chapters: 5, testament: "NT" },
   { id: "1pe", name: "1 Peter", nameUr: "1 پطرس", chapters: 5, testament: "NT" },
-  { id: "2pe", name: "2 Peter", nameUr: "2 پطرس", chapters: 3, testament: "NT" },
+  { id: "2pe", name: "2 Peter", nameUr: "2 پطرس", chapters: 5, testament: "NT" },
   { id: "1jn", name: "1 John", nameUr: "1 یوحنا", chapters: 5, testament: "NT" },
   { id: "2jn", name: "2 John", nameUr: "2 یوحنا", chapters: 1, testament: "NT" },
   { id: "3jn", name: "3 John", nameUr: "3 یوحنا", chapters: 1, testament: "NT" },
@@ -104,136 +110,206 @@ function UrduBiblePlayer() {
   const [selectedChapter, setSelectedChapter] = useState(1);
   const [testamentFilter, setTestamentFilter] = useState<"OT" | "NT">("NT");
   const [searchQuery, setSearchQuery] = useState("");
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const waveformRef = useRef<HTMLDivElement>(null);
+  const wavesurferRef = useRef<any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioLoading, setAudioLoading] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [audioError, setAudioError] = useState(false);
+  const [wsReady, setWsReady] = useState(false);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
   const retryCountRef = useRef(0);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
 
   const getAudioUrl = (bookId: string, chapter: number) =>
     `https://www.gbcpakistan.org/mp3/urdu_bible/${GBC_AUDIO_MAP[bookId]}${chapter}.mp3`;
 
-  const loadAndPlay = useCallback((bookId: string, chapter: number) => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    setAudioLoading(true);
-    setAudioError(false);
-    retryCountRef.current = 0;
-
-    const playAttempt = () => {
-      if (!audio) return;
-      const url = getAudioUrl(bookId, chapter);
-
-      const doPlay = () => {
-        const promise = audio.play();
-        if (promise !== undefined) {
-          promise
-            .then(() => {
-              setIsPlaying(true);
-              setAudioLoading(false);
-              setAudioError(false);
-            })
-            .catch(() => {
-              if (retryCountRef.current < 4) {
-                retryCountRef.current++;
-                setTimeout(playAttempt, retryCountRef.current * 1000);
-              } else {
-                setAudioError(true);
-                setAudioLoading(false);
-              }
-            });
-        }
-      };
-
-      const onLoadError = () => {
-        if (retryCountRef.current < 4) {
-          retryCountRef.current++;
-          setTimeout(playAttempt, retryCountRef.current * 1000);
-        } else {
-          setAudioError(true);
-          setAudioLoading(false);
-        }
-      };
-
-      audio.oncanplay = doPlay;
-      audio.onloadeddata = doPlay;
-      audio.onerror = onLoadError;
-      audio.src = `${url}?t=${Date.now()}`;
-      audio.load();
-    };
-
-    playAttempt();
+  const destroyWs = useCallback(() => {
+    if (wavesurferRef.current) {
+      try { wavesurferRef.current.destroy(); } catch {}
+      wavesurferRef.current = null;
+    }
+    setWsReady(false);
   }, []);
 
+  function getNextBook(currentBook: typeof BIBLE_BOOKS[0]) {
+    const idx = BIBLE_BOOKS.findIndex(b => b.id === currentBook.id);
+    if (idx >= 0 && idx < BIBLE_BOOKS.length - 1) {
+      return BIBLE_BOOKS[idx + 1];
+    }
+    return null;
+  }
+
+  const loadAndPlay = useCallback((bookId: string, chapter: number) => {
+    if (!mountedRef.current) return;
+    setAudioLoading(true);
+    setAudioError(false);
+    setWsReady(false);
+    retryCountRef.current = 0;
+
+    const url = getAudioUrl(bookId, chapter);
+
+    const initWs = async () => {
+      try {
+        const WaveSurfer = (await import("wavesurfer.js")).default;
+        if (!mountedRef.current || !waveformRef.current) return;
+
+        destroyWs();
+
+        const ws = WaveSurfer.create({
+          container: waveformRef.current!,
+          waveColor: "rgba(229, 9, 20, 0.25)",
+          progressColor: "#e50914",
+          cursorColor: "transparent",
+          barWidth: 2,
+          barGap: 1,
+          barRadius: 2,
+          height: 72,
+          normalize: true,
+          backend: "WebAudio",
+          url,
+        });
+
+        ws.on("ready", () => {
+          if (!mountedRef.current) return;
+          setWsReady(true);
+          setDuration(ws.getDuration());
+          setAudioLoading(false);
+          setAudioError(false);
+          ws.play();
+          setIsPlaying(true);
+        });
+
+        ws.on("audioprocess", () => {
+          if (!mountedRef.current) return;
+          setCurrentTime(ws.getCurrentTime());
+        });
+
+        ws.on("play", () => {
+          if (mountedRef.current) setIsPlaying(true);
+        });
+
+        ws.on("pause", () => {
+          if (mountedRef.current) setIsPlaying(false);
+        });
+
+        ws.on("finish", () => {
+          if (!mountedRef.current) return;
+          setIsPlaying(false);
+          setCurrentTime(0);
+          if (selectedChapter < selectedBook.chapters) {
+            const nextCh = selectedChapter + 1;
+            setSelectedChapter(nextCh);
+            loadAndPlay(selectedBook.id, nextCh);
+          } else {
+            const nextBook = getNextBook(selectedBook);
+            if (nextBook) {
+              setSelectedBook(nextBook);
+              setSelectedChapter(1);
+              setTestamentFilter(nextBook.testament as "OT" | "NT");
+              loadAndPlay(nextBook.id, 1);
+            }
+          }
+        });
+
+        ws.on("error", () => {
+          if (!mountedRef.current) return;
+          if (retryCountRef.current < 3) {
+            retryCountRef.current++;
+            setTimeout(() => initWs(), retryCountRef.current * 1500);
+          } else {
+            setAudioError(true);
+            setAudioLoading(false);
+          }
+        });
+
+        wavesurferRef.current = ws;
+      } catch {
+        if (mountedRef.current) {
+          if (retryCountRef.current < 3) {
+            retryCountRef.current++;
+            setTimeout(() => initWs(), retryCountRef.current * 1500);
+          } else {
+            setAudioError(true);
+            setAudioLoading(false);
+          }
+        }
+      }
+    };
+
+    initWs();
+  }, [selectedBook, selectedChapter, destroyWs]);
+
   const playAudio = useCallback(() => {
-    loadAndPlay(selectedBook.id, selectedChapter);
-  }, [selectedBook.id, selectedChapter, loadAndPlay]);
+    if (wavesurferRef.current && wsReady) {
+      wavesurferRef.current.play();
+    } else {
+      loadAndPlay(selectedBook.id, selectedChapter);
+    }
+  }, [selectedBook.id, selectedChapter, loadAndPlay, wsReady]);
 
   const pauseAudio = () => {
-    if (!audioRef.current) return;
-    audioRef.current.pause();
-    setIsPlaying(false);
+    if (wavesurferRef.current) {
+      wavesurferRef.current.pause();
+    }
   };
 
   const handleBookSelect = useCallback((book: typeof BIBLE_BOOKS[0]) => {
     setSelectedBook(book);
     setSelectedChapter(1);
     setIsPlaying(false);
-    setProgress(0);
+    setCurrentTime(0);
     setDuration(0);
     setAudioError(false);
     retryCountRef.current = 0;
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.oncanplay = null;
-      audioRef.current.onloadeddata = null;
-      audioRef.current.onerror = null;
-      audioRef.current.removeAttribute("src");
-    }
-  }, []);
-
-  const handleTimeUpdate = () => {
-    if (!audioRef.current) return;
-    const cur = audioRef.current.currentTime;
-    const dur = audioRef.current.duration || 0;
-    setCurrentTime(cur);
-    setProgress(dur > 0 ? (cur / dur) * 100 : 0);
-  };
-
-  const handleLoadedMetadata = () => {
-    if (audioRef.current) {
-      setDuration(audioRef.current.duration || 0);
-    }
-  };
-
-  const seekTo = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!audioRef.current || !duration) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    audioRef.current.currentTime = pct * duration;
-  };
+    destroyWs();
+  }, [destroyWs]);
 
   const skipChapter = useCallback((dir: -1 | 1) => {
     const newCh = selectedChapter + dir;
     if (newCh >= 1 && newCh <= selectedBook.chapters) {
       setSelectedChapter(newCh);
-      setProgress(0);
       setAudioError(false);
       retryCountRef.current = 0;
+      destroyWs();
       loadAndPlay(selectedBook.id, newCh);
     }
-  }, [selectedChapter, selectedBook, loadAndPlay]);
+  }, [selectedChapter, selectedBook, loadAndPlay, destroyWs]);
 
-  const getNextBook = useCallback((currentBook: typeof BIBLE_BOOKS[0]) => {
-    const idx = BIBLE_BOOKS.findIndex(b => b.id === currentBook.id);
-    if (idx >= 0 && idx < BIBLE_BOOKS.length - 1) {
-      return BIBLE_BOOKS[idx + 1];
-    }
-    return null;
-  }, []);
+  const skipBackward = () => {
+    if (!wavesurferRef.current) return;
+    const t = Math.max(0, wavesurferRef.current.getCurrentTime() - 10);
+    wavesurferRef.current.setTime(t);
+    setCurrentTime(t);
+  };
+
+  const skipForward = () => {
+    if (!wavesurferRef.current) return;
+    const t = Math.min(duration, wavesurferRef.current.getCurrentTime() + 10);
+    wavesurferRef.current.setTime(t);
+    setCurrentTime(t);
+  };
+
+  const toggleMute = () => {
+    if (!wavesurferRef.current) return;
+    const newMuted = !isMuted;
+    wavesurferRef.current.setVolume(newMuted ? 0 : volume);
+    setIsMuted(newMuted);
+  };
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = parseFloat(e.target.value);
+    setVolume(v);
+    setIsMuted(false);
+    if (wavesurferRef.current) wavesurferRef.current.setVolume(v);
+  };
 
   const formatTime = (s: number) => {
     if (!s || !isFinite(s)) return "0:00";
@@ -246,14 +322,11 @@ function UrduBiblePlayer() {
     (b) => b.testament === testamentFilter && (searchQuery === "" || b.name.toLowerCase().includes(searchQuery.toLowerCase()) || b.nameUr.includes(searchQuery))
   );
 
-  const otCount = 39;
-  const ntCount = 27;
-
   return (
     <div className="w-full max-w-5xl mx-auto rounded-3xl overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.9)] border border-white/5 flex flex-col lg:flex-row relative">
 
       {/* ── LEFT PANEL: Player Controls ──────────────────────────── */}
-      <div className="relative lg:w-[340px] flex-shrink-0 bg-gradient-to-br from-[#0f0f0f] via-[#1a0505] to-[#0f0f0f] p-7 flex flex-col justify-between z-10 border-b lg:border-b-0 lg:border-r border-white/5">
+      <div className="relative lg:w-[380px] flex-shrink-0 bg-gradient-to-br from-[#0f0f0f] via-[#1a0505] to-[#0f0f0f] p-7 flex flex-col justify-between z-10 border-b lg:border-b-0 lg:border-r border-white/5">
 
         {/* Ambient glow */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(229,9,20,0.12),transparent_70%)] pointer-events-none" />
@@ -285,82 +358,124 @@ function UrduBiblePlayer() {
           </div>
         </div>
 
-        {/* Waveform visualizer (decorative bars) */}
-        <div className="relative z-10 my-5 flex items-end justify-center gap-[3px] h-8">
-          {[...Array(22)].map((_, i) => {
-            const baseH = 4 + Math.abs(Math.sin(i * 0.7)) * 20;
-            return (
-              <div
-                key={i}
-                className={`w-[3px] rounded-full transition-colors duration-300 ${isPlaying ? 'bg-btl-red/70' : 'bg-white/10'}`}
-                style={{ height: `${baseH}px` }}
-              />
-            );
-          })}
+        {/* Waveform */}
+        <div className="relative z-10 my-5">
+          <div ref={waveformRef} className="w-full" />
+          {!wsReady && !audioError && (
+            <div className="flex items-end justify-center gap-[3px] h-[72px]">
+              {[...Array(32)].map((_, i) => {
+                const baseH = 4 + Math.abs(Math.sin(i * 0.7)) * 28;
+                return (
+                  <div
+                    key={i}
+                    className={`w-[3px] rounded-full transition-colors duration-300 ${isPlaying ? 'bg-btl-red/40' : 'bg-white/8'}`}
+                    style={{ height: `${baseH}px`, animation: audioLoading ? `pulse 0.8s ease-in-out ${i * 0.05}s infinite` : 'none' }}
+                  />
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {/* Progress Bar */}
-        <div className="relative z-10 mb-5 space-y-2">
-          <div
-            className="w-full h-1.5 bg-white/10 rounded-full cursor-pointer relative group/bar"
-            onClick={seekTo}
-          >
-            <div
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-btl-red to-[#ff4444] rounded-full transition-all duration-100 ease-linear shadow-[0_0_8px_rgba(229,9,20,0.6)]"
-              style={{ width: `${progress}%` }}
-            >
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 h-3.5 w-3.5 bg-white rounded-full shadow-lg scale-0 group-hover/bar:scale-100 transition-transform origin-center translate-x-1/2 border-2 border-btl-red" />
-            </div>
-          </div>
-          <div className="flex justify-between text-[10px] font-mono font-medium text-gray-600 tracking-wider">
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatTime(duration)}</span>
-          </div>
+        {/* Time */}
+        <div className="relative z-10 flex justify-between text-[10px] font-mono font-medium text-gray-600 tracking-wider mb-3">
+          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(duration)}</span>
         </div>
 
         {/* Controls */}
-        <div className="relative z-10 flex items-center justify-center gap-5">
-          <button
-            disabled={selectedChapter <= 1}
-            onClick={() => skipChapter(-1)}
-            className="h-10 w-10 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </button>
+        <div className="relative z-10 flex flex-col gap-3">
+          {/* Main controls row */}
+          <div className="flex items-center justify-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-gray-400 hover:text-white"
+              onClick={skipBackward}
+              disabled={!wsReady}
+            >
+              <SkipBack className="h-4 w-4" />
+            </Button>
 
-          <button
-            className={`h-16 w-16 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg ${
-              isPlaying
-                ? "bg-white text-black hover:scale-105"
-                : audioError
-                  ? "bg-red-900/50 text-red-400 border border-red-500/50 hover:bg-red-900/70"
-                  : "bg-btl-red text-white hover:bg-[#ff1a25] hover:scale-110 shadow-[0_0_20px_rgba(229,9,20,0.4)] hover:shadow-[0_0_35px_rgba(229,9,20,0.7)]"
-            }`}
-            onClick={audioError ? playAudio : isPlaying ? pauseAudio : playAudio}
-            disabled={audioLoading && !audioError}
-          >
-            {audioLoading && !audioError ? (
-              <div className="h-6 w-6 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            ) : audioError ? (
-              <RotateCcw className="h-5 w-5" />
-            ) : isPlaying ? (
-              <Pause className="h-7 w-7 fill-current" />
-            ) : (
-              <Play className="h-7 w-7 fill-current ml-0.5" />
-            )}
-          </button>
+            <button
+              disabled={selectedChapter <= 1}
+              onClick={() => skipChapter(-1)}
+              className="h-8 w-8 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
 
-          <button
-            disabled={selectedChapter >= selectedBook.chapters}
-            onClick={() => skipChapter(1)}
-            className="h-10 w-10 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
-          >
-            <ChevronRight className="h-6 w-6" />
-          </button>
+            <button
+              className={`h-14 w-14 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg ${
+                isPlaying
+                  ? "bg-white text-black hover:scale-105"
+                  : audioError
+                    ? "bg-red-900/50 text-red-400 border border-red-500/50 hover:bg-red-900/70"
+                    : "bg-btl-red text-white hover:bg-[#ff1a25] hover:scale-110 shadow-[0_0_20px_rgba(229,9,20,0.4)] hover:shadow-[0_0_35px_rgba(229,9,20,0.7)]"
+              }`}
+              onClick={audioError ? playAudio : isPlaying ? pauseAudio : playAudio}
+              disabled={audioLoading && !audioError}
+            >
+              {audioLoading && !audioError ? (
+                <div className="h-5 w-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              ) : audioError ? (
+                <RotateCcw className="h-5 w-5" />
+              ) : isPlaying ? (
+                <Pause className="h-6 w-6 fill-current" />
+              ) : (
+                <Play className="h-6 w-6 fill-current ml-0.5" />
+              )}
+            </button>
+
+            <button
+              disabled={selectedChapter >= selectedBook.chapters}
+              onClick={() => skipChapter(1)}
+              className="h-8 w-8 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-gray-400 hover:text-white"
+              onClick={skipForward}
+              disabled={!wsReady}
+            >
+              <SkipForward className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Volume control */}
+          <div className="flex items-center justify-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-gray-400 hover:text-white"
+              onClick={toggleMute}
+            >
+              {isMuted || volume === 0 ? (
+                <VolumeX className="h-3.5 w-3.5" />
+              ) : volume < 0.5 ? (
+                <Volume1 className="h-3.5 w-3.5" />
+              ) : (
+                <Volume2 className="h-3.5 w-3.5" />
+              )}
+            </Button>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={isMuted ? 0 : volume}
+              onChange={handleVolumeChange}
+              className="w-20 h-1 accent-btl-red"
+            />
+          </div>
         </div>
 
         {/* Status messages */}
-        <div className="relative z-10 h-8 mt-4 text-center">
+        <div className="relative z-10 h-8 mt-3 text-center">
           <AnimatePresence>
             {audioError && (
               <motion.div
@@ -384,32 +499,6 @@ function UrduBiblePlayer() {
             )}
           </AnimatePresence>
         </div>
-
-        <audio
-          ref={audioRef}
-          preload="auto"
-          onEnded={() => {
-            setProgress(0);
-            setDuration(0);
-            if (selectedChapter < selectedBook.chapters) {
-              const nextCh = selectedChapter + 1;
-              setSelectedChapter(nextCh);
-              loadAndPlay(selectedBook.id, nextCh);
-            } else {
-              const nextBook = getNextBook(selectedBook);
-              if (nextBook) {
-                setSelectedBook(nextBook);
-                setSelectedChapter(1);
-                setTestamentFilter(nextBook.testament as "OT" | "NT");
-                loadAndPlay(nextBook.id, 1);
-              } else {
-                setIsPlaying(false);
-              }
-            }
-          }}
-          onTimeUpdate={handleTimeUpdate}
-          onLoadedMetadata={handleLoadedMetadata}
-        />
       </div>
 
       {/* ── RIGHT PANEL: Book + Chapter Selectors ─────────────────── */}
@@ -484,10 +573,9 @@ function UrduBiblePlayer() {
                 key={ch}
                 onClick={() => {
                   setSelectedChapter(ch);
-                  setProgress(0);
-                  setDuration(0);
                   setAudioError(false);
                   retryCountRef.current = 0;
+                  destroyWs();
                   loadAndPlay(selectedBook.id, ch);
                 }}
                 className={`min-w-[34px] h-8 px-2 rounded-lg text-[11px] font-bold transition-all duration-150 ${
