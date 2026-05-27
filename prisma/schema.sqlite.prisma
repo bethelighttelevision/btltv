@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -53,13 +53,13 @@ model Lesson {
 }
 
 model QuizQuestion {
-  id            String @id @default(cuid())
-  question      String
-  options       String
-  correctAnswer Int
-  order         Int    @default(0)
-  lessonId      String
-  lesson        Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  id             String @id @default(cuid())
+  question       String
+  options        String
+  correctAnswer  Int
+  order          Int    @default(0)
+  lessonId       String
+  lesson         Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 }
 
 model LessonProgress {
