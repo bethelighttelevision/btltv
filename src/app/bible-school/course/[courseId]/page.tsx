@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, BookOpen, CheckCircle, XCircle, Award, ChevronRight, Loader2, FileText } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle, XCircle, Award, ChevronRight, Loader2, FileText, Headphones } from "lucide-react";
+import BibleAudioPlayer from "@/components/site/BibleAudioPlayer";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import AuthGuard from "@/components/AuthGuard";
@@ -23,6 +24,7 @@ interface Lesson {
   content: string;
   order: number;
   questions: Question[];
+  audioUrl?: string;
 }
 
 interface Course {
@@ -64,16 +66,26 @@ function CourseContent() {
     ]).then(([courseData, enrollmentData]) => {
       setCourse(courseData);
       const allLessons = courseData.lessons || [];
-      const fetched: Lesson[] = allLessons.map((l: any) => ({
-        id: l.id,
-        title: l.title,
-        content: l.content || "",
-        order: l.order,
-        questions: (l.questions || []).map((q: any) => ({
-          ...q,
-          options: typeof q.options === "string" ? JSON.parse(q.options) : q.options,
-        })),
-      }));
+      const fetched: Lesson[] = allLessons.map((l: any) => {
+        let content = l.content || "";
+        let audioUrl: string | undefined;
+        const audioMatch = content.match(/^\[audio:(.+?)\]\s*/);
+        if (audioMatch) {
+          audioUrl = audioMatch[1];
+          content = content.slice(audioMatch[0].length);
+        }
+        return {
+          id: l.id,
+          title: l.title,
+          content,
+          order: l.order,
+          audioUrl,
+          questions: (l.questions || []).map((q: any) => ({
+            ...q,
+            options: typeof q.options === "string" ? JSON.parse(q.options) : q.options,
+          })),
+        };
+      });
       setLessons(fetched);
       setEnrollment(enrollmentData.enrollment);
       setLessonProgress(enrollmentData.lessonProgress || []);
@@ -245,6 +257,15 @@ function CourseContent() {
                     <div className="prose prose-invert max-w-none">
                       <p className="text-gray-300 leading-relaxed whitespace-pre-line text-right font-urdu text-lg">{lesson.content}</p>
                     </div>
+                    {lesson.audioUrl && (
+                      <div className="mt-6">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Headphones className="h-4 w-4 text-btl-red" />
+                          <span className="text-sm text-gray-400 font-urdu">آڈیو سبق</span>
+                        </div>
+                        <BibleAudioPlayer audioUrl={lesson.audioUrl} title={lesson.title} />
+                      </div>
+                    )}
                     <div className="mt-8 flex justify-center">
                       <Button onClick={() => setView("quiz")} className="bg-btl-red hover:bg-btl-red/90 text-white px-8 h-12 rounded-xl font-urdu text-lg">
                         کوئز شروع کریں <ChevronRight className="mr-2 h-5 w-5" />
