@@ -132,8 +132,9 @@
 
 @font-face {
   font-family: 'Jameel Noori Nastaleeq';
-  src: url('https://cdn.rawgit.com/mushfiq/Jameel-Noori-Nastaleeq-Web-Font/master/JameelNooriNastaleeq.woff2') format('woff2'),
-       url('https://cdn.rawgit.com/mushfiq/Jameel-Noori-Nastaleeq-Web-Font/master/JameelNooriNastaleeq.woff') format('woff');
+  src: local('Jameel Noori Nastaleeq'),
+       url('https://cdn.jsdelivr.net/gh/mushfiq/Jameel-Noori-Nastaleeq-Web-Font@master/JameelNooriNastaleeq.woff2') format('woff2'),
+       url('https://cdn.jsdelivr.net/gh/mushfiq/Jameel-Noori-Nastaleeq-Web-Font@master/JameelNooriNastaleeq.woff') format('woff');
   font-weight: normal;
   font-style: normal;
   font-display: swap;

@@ -1,8 +1,4 @@
-"use client";
-
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Headphones } from "lucide-react";
+import { Headphones, ExternalLink, Music } from "lucide-react";
 
 const SOUNDCLOUD_PLAYLISTS = [
   { slug: "khuda-kon-hai", title: "Khuda Kon Hai", titleUr: "خدا کون ہے", icon: "✝️" },
@@ -20,10 +16,6 @@ const SOUNDCLOUD_PLAYLISTS = [
 const SC_BASE = "https://soundcloud.com/user-549013936/sets";
 
 function SoundCloudSection() {
-  const [selectedPlaylist, setSelectedPlaylist] = useState(SOUNDCLOUD_PLAYLISTS[0]);
-
-  const embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(`${SC_BASE}/${selectedPlaylist.slug}`)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&show_artwork=true&buying=false&liking=false&sharing=false&download=false`;
-
   return (
     <section className="relative py-12 overflow-hidden bg-[#050505] border-y border-white/5">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#ff5500]/10 via-[#050505] to-[#050505] opacity-50" />
@@ -45,65 +37,29 @@ function SoundCloudSection() {
           </p>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6">
-
-          {/* Playlists Sidebar */}
-          <div className="w-full lg:w-72 shrink-0">
-            <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3 shadow-xl">
-              <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto lg:max-h-[520px] pb-1 lg:pb-0 hide-scrollbar">
-                {SOUNDCLOUD_PLAYLISTS.map((pl) => (
-                  <button
-                    key={pl.slug}
-                    onClick={() => setSelectedPlaylist(pl)}
-                    className={`flex items-center gap-3 p-2.5 rounded-xl transition-all duration-300 shrink-0 border text-left ${
-                      selectedPlaylist.slug === pl.slug
-                        ? "bg-gradient-to-r from-[#ff5500]/10 to-transparent border-[#ff5500]/30 shadow-[0_0_15px_rgba(255,85,0,0.1)]"
-                        : "bg-black/20 border-transparent hover:bg-white/5"
-                    }`}
-                  >
-                    <div className={`text-lg h-9 w-9 rounded-full flex items-center justify-center shrink-0 transition-colors ${
-                      selectedPlaylist.slug === pl.slug ? "bg-[#ff5500]/20" : "bg-white/5"
-                    }`}>
-                      {pl.icon}
-                    </div>
-                    <div className="min-w-0">
-                      <p className={`font-bold text-sm truncate max-w-[140px] ${
-                        selectedPlaylist.slug === pl.slug ? "text-white" : "text-gray-300"
-                      }`}>
-                        {pl.title}
-                      </p>
-                      <p className="text-xs font-urdu text-gray-500 mt-0.5 truncate max-w-[140px]" dir="rtl">{pl.titleUr}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Player */}
-          <div className="flex-1 min-w-0">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          {SOUNDCLOUD_PLAYLISTS.map((pl) => (
+            <a
+              key={pl.slug}
+              href={`${SC_BASE}/${pl.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex flex-col items-center text-center p-4 rounded-2xl bg-[#0a0a0a] border border-white/5 hover:border-[#ff5500]/30 hover:bg-gradient-to-b hover:from-[#ff5500]/5 hover:to-transparent transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,85,0,0.1)]"
             >
-              <div className="bg-black/40 mx-2 my-2 rounded-xl overflow-hidden border border-white/5">
-                <iframe
-                  src={embedUrl}
-                  width="100%"
-                  height="350"
-                  scrolling="no"
-                  frameBorder="no"
-                  allow="autoplay"
-                  title={`BTL TV - ${selectedPlaylist.title}`}
-                  className="w-full block"
-                  key={selectedPlaylist.slug}
-                />
+              <div className="text-3xl mb-3 h-14 w-14 rounded-full bg-white/5 group-hover:bg-[#ff5500]/20 flex items-center justify-center transition-colors duration-300">
+                <span className="group-hover:scale-110 transition-transform duration-300">{pl.icon}</span>
               </div>
-            </motion.div>
-          </div>
-
+              <p className="font-bold text-sm text-gray-300 group-hover:text-white transition-colors duration-300 line-clamp-2 leading-tight">
+                {pl.title}
+              </p>
+              <p className="text-xs font-urdu text-gray-500 mt-1 line-clamp-1" dir="rtl">{pl.titleUr}</p>
+              <div className="mt-3 flex items-center gap-1 text-[10px] text-gray-600 group-hover:text-[#ff5500] transition-colors duration-300 uppercase tracking-wider font-semibold">
+                <Music className="h-3 w-3" />
+                Listen
+                <ExternalLink className="h-3 w-3" />
+              </div>
+            </a>
+          ))}
         </div>
       </div>
     </section>

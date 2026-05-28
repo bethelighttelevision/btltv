@@ -59,6 +59,8 @@ function ProgramCard({
             width={320}
             height={180}
             loading="lazy"
+            decoding="async"
+            sizes="(max-width: 640px) 160px, 220px"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />

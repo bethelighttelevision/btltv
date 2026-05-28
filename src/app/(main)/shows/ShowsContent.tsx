@@ -44,7 +44,7 @@ function ShowsContentInner() {
           <motion.div key={program.id} whileHover={{ y: -4 }} className="cursor-pointer" onClick={() => router.push(`/shows/${program.slug}`)}>
             <div className="overflow-hidden rounded-md bg-btl-card hover:ring-1 hover:ring-btl-red/30 transition-all">
               <div className="relative aspect-video overflow-hidden">
-                <img src={program.poster} alt={program.title} width={320} height={180} loading="lazy" className="w-full h-full object-cover" />
+                <img src={program.poster} alt={program.title} width={320} height={180} loading="lazy" decoding="async" sizes="(max-width: 640px) 160px, 220px" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <Badge className="absolute top-1.5 left-1.5 bg-btl-red/90 text-white text-[9px] font-bold px-1.5 py-0">{program.category}</Badge>
                 <div className="absolute bottom-1.5 right-1.5 bg-black/60 rounded-full px-1.5 py-0 text-[9px] text-white flex items-center gap-0.5">

@@ -28,6 +28,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: `https://btl-tv.com/shows/${slug}`,
       images: [{ url: program.poster, width: 1280, height: 720 }],
     },
+    twitter: {
+      card: "summary_large_image",
+      title: `${program.title} — BTL TV`,
+      description: program.description,
+      images: [program.poster],
+    },
   };
 }
 
