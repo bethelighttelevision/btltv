@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Phone, Mail, MapPin, Globe, Youtube, Facebook, Instagram, Send, Loader2, MessageCircle, Disc3,
+  Phone, Mail, MapPin, Globe, Send, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -170,21 +170,7 @@ export default function ContactContent() {
           </motion.div>
         </div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
-          <Card className="bg-btl-card border-btl-card-border overflow-hidden">
-            <div className="bg-gradient-to-r from-btl-red/10 to-transparent p-4 md:p-5 border-b border-btl-card-border">
-              <div className="flex items-center gap-3"><MessageCircle className="h-5 w-5 text-btl-red" /><h2 className="text-lg font-bold text-foreground">Follow Us</h2></div>
-            </div>
-            <CardContent className="p-5">
-              <div className="flex gap-3 flex-wrap">
-                <Button variant="outline" size="icon" className="h-12 w-12 border-border/30 text-muted-foreground hover:text-btl-red hover:border-btl-red/30" onClick={() => window.open("https://www.youtube.com/@btltv", "_blank")}><Youtube className="h-6 w-6" /></Button>
-                <Button variant="outline" size="icon" className="h-12 w-12 border-border/30 text-muted-foreground hover:text-[#ff5500] hover:border-[#ff5500]/30" onClick={() => window.open("https://soundcloud.com/user-549013936", "_blank")}><Disc3 className="h-6 w-6" /></Button>
-                <Button variant="outline" size="icon" className="h-12 w-12 border-border/30 text-muted-foreground hover:text-btl-red hover:border-btl-red/30" onClick={() => window.open("https://www.facebook.com/btltv", "_blank")}><Facebook className="h-6 w-6" /></Button>
-                <Button variant="outline" size="icon" className="h-12 w-12 border-border/30 text-muted-foreground hover:text-btl-red hover:border-btl-red/30" onClick={() => window.open("https://www.instagram.com/btltv", "_blank")}><Instagram className="h-6 w-6" /></Button>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+
       </div>
     </div>
   );
