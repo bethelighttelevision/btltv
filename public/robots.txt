@@ -1,12 +1,20 @@
+# *
 User-agent: *
 Allow: /
+
+# *
+User-agent: *
 Disallow: /admin
 Disallow: /dashboard
 Disallow: /profile
 Disallow: /auth
 Disallow: /api
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /bible-school/course
 
+# Host
+Host: https://btl-tv.com
+
+# Sitemaps
 Sitemap: https://btl-tv.com/sitemap.xml
-
-# IndexNow
-IndexNow: https://btl-tv.com/34ca8fee16d64bc4bb0eb2477b72a4ef.txt

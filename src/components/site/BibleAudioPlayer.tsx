@@ -10,8 +10,7 @@ interface BibleAudioPlayerProps {
 }
 
 export default function BibleAudioPlayer({ audioUrl, title }: BibleAudioPlayerProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const wavesurferRef = useRef<any>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -19,112 +18,112 @@ export default function BibleAudioPlayer({ audioUrl, title }: BibleAudioPlayerPr
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  const [localLoading, setLocalLoading] = useState(false);
 
   useEffect(() => {
-    if (!audioUrl || !containerRef.current) return;
-
+    if (!audioUrl) return;
     let mounted = true;
-    let ws: any = null;
 
-    const init = async () => {
-      try {
-        const WaveSurfer = (await import("wavesurfer.js")).default;
-        ws = WaveSurfer.create({
-          container: containerRef.current!,
-          waveColor: "rgba(229, 9, 20, 0.3)",
-          progressColor: "#e50914",
-          cursorColor: "#e50914",
-          cursorWidth: 1,
-          barWidth: 2,
-          barGap: 1,
-          barRadius: 2,
-          height: 64,
-          normalize: true,
-          backend: "WebAudio",
-        });
+    setLoadError(false);
+    setIsReady(false);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+    setLocalLoading(true);
 
-        ws.load(audioUrl);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+    }
 
-        ws.on("ready", () => {
-          if (!mounted) return;
-          setIsReady(true);
-          setDuration(ws.getDuration());
-          setLoadError(false);
-        });
+    const audio = new Audio(audioUrl);
+    audio.preload = "auto";
+    audio.volume = volume;
 
-        ws.on("audioprocess", () => {
-          if (!mounted) return;
-          setCurrentTime(ws.getCurrentTime());
-        });
+    audio.addEventListener("loadedmetadata", () => {
+      if (!mounted) return;
+      setDuration(audio.duration);
+    });
 
-        ws.on("play", () => {
-          if (!mounted) return;
-          setIsPlaying(true);
-        });
+    audio.addEventListener("canplay", () => {
+      if (!mounted) return;
+      setIsReady(true);
+      setLoadError(false);
+      setLocalLoading(false);
+    });
 
-        ws.on("pause", () => {
-          if (!mounted) return;
-          setIsPlaying(false);
-        });
+    audio.addEventListener("timeupdate", () => {
+      if (!mounted) return;
+      setCurrentTime(audio.currentTime);
+    });
 
-        ws.on("finish", () => {
-          if (!mounted) return;
-          setIsPlaying(false);
-        });
+    audio.addEventListener("ended", () => {
+      if (!mounted) return;
+      setIsPlaying(false);
+    });
 
-        ws.on("error", () => {
-          if (!mounted) return;
-          setLoadError(true);
-        });
+    audio.addEventListener("error", () => {
+      if (!mounted) return;
+      setLoadError(true);
+      setLocalLoading(false);
+    });
 
-        wavesurferRef.current = ws;
-      } catch {
-        if (mounted) setLoadError(true);
-      }
-    };
+    audio.addEventListener("play", () => {
+      if (mounted) setIsPlaying(true);
+    });
 
-    init();
+    audio.addEventListener("pause", () => {
+      if (mounted) setIsPlaying(false);
+    });
+
+    audioRef.current = audio;
 
     return () => {
       mounted = false;
-      if (ws) {
-        try { ws.destroy(); } catch {}
-        wavesurferRef.current = null;
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
       }
     };
   }, [audioUrl]);
 
   const togglePlay = () => {
-    if (!wavesurferRef.current) return;
-    wavesurferRef.current.playPause();
+    if (!audioRef.current) return;
+    if (audioRef.current.paused) {
+      audioRef.current.play().catch(() => setLoadError(true));
+    } else {
+      audioRef.current.pause();
+    }
   };
 
   const skipBackward = () => {
-    if (!wavesurferRef.current) return;
-    const t = Math.max(0, wavesurferRef.current.getCurrentTime() - 10);
-    wavesurferRef.current.setTime(t);
+    if (!audioRef.current) return;
+    const t = Math.max(0, audioRef.current.currentTime - 10);
+    audioRef.current.currentTime = t;
     setCurrentTime(t);
   };
 
   const skipForward = () => {
-    if (!wavesurferRef.current) return;
-    const t = Math.min(duration, wavesurferRef.current.getCurrentTime() + 10);
-    wavesurferRef.current.setTime(t);
+    if (!audioRef.current) return;
+    const t = Math.min(duration, audioRef.current.currentTime + 10);
+    audioRef.current.currentTime = t;
     setCurrentTime(t);
   };
 
   const toggleMute = () => {
-    if (!wavesurferRef.current) return;
-    const newMuted = !isMuted;
-    wavesurferRef.current.setVolume(newMuted ? 0 : volume);
-    setIsMuted(newMuted);
+    if (!audioRef.current) return;
+    audioRef.current.muted = !isMuted;
+    setIsMuted(!isMuted);
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = parseFloat(e.target.value);
     setVolume(v);
     setIsMuted(false);
-    if (wavesurferRef.current) wavesurferRef.current.setVolume(v);
+    if (audioRef.current) {
+      audioRef.current.volume = v;
+      audioRef.current.muted = false;
+    }
   };
 
   const formatTime = (s: number) => {
@@ -149,8 +148,29 @@ export default function BibleAudioPlayer({ audioUrl, title }: BibleAudioPlayerPr
         <p className="text-xs text-gray-400 font-medium truncate">{title}</p>
       )}
 
-      <div ref={containerRef} className="w-full" />
+      {/* Decorative waveform bars */}
+      <div className="flex items-end justify-center gap-[2px] h-16">
+        {[...Array(48)].map((_, i) => {
+          const baseH = 4 + Math.abs(Math.sin(i * 0.5)) * 24;
+          const wave = isPlaying ? Math.abs(Math.sin(i * 0.2 + Date.now() * 0.003)) * 20 : 0;
+          const progress = duration > 0 ? currentTime / duration : 0;
+          const barPos = i / 48;
+          const isPlayed = barPos <= progress;
+          return (
+            <div
+              key={i}
+              className="w-[2px] rounded-full transition-all duration-100"
+              style={{
+                height: `${baseH + wave}px`,
+                backgroundColor: isReady && isPlayed ? '#e50914' : isReady && isPlayed ? 'rgba(229, 9, 20, 0.5)' : 'rgba(255,255,255,0.08)',
+                opacity: localLoading ? 0.4 : 0.85,
+              }}
+            />
+          );
+        })}
+      </div>
 
+      {/* Waveform space (kept for future use) */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-1">
           <Button

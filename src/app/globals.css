@@ -226,6 +226,17 @@
   background-clip: text;
 }
 
+/* ─── Eternal Flame Logo Pulse ─── */
+.eternal-flame {
+  animation: flame-breathe 3s ease-in-out infinite;
+}
+
+@keyframes flame-breathe {
+  0% { filter: drop-shadow(0 0 4px rgba(229, 9, 20, 0.3)) brightness(1); }
+  50% { filter: drop-shadow(0 0 20px rgba(229, 9, 20, 0.6)) drop-shadow(0 0 40px rgba(255, 215, 0, 0.2)) brightness(1.1); }
+  100% { filter: drop-shadow(0 0 4px rgba(229, 9, 20, 0.3)) brightness(1); }
+}
+
 /* ─── Intro Animation — Centered Hexagonal B Mark ─── */
 /* Phase 1 (0.5-1.7s): Hexagonal border draws */
 /* Phase 2 (0.9-1.8s): B letter draws inside hexagon */

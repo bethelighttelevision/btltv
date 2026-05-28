@@ -27,6 +27,9 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://btl-tv.com"),
+  alternates: {
+    canonical: "https://btl-tv.com",
+  },
   title: "BTL TV — Be The Light Television",
   description:
     "BTL TV is a Christian faith-based television platform broadcasting in Urdu for Pakistani-speaking communities worldwide. Watch devotional programs, talk shows, dramas, and more.",
@@ -102,6 +105,74 @@ export default function RootLayout({
         <meta name="msapplication-tap-highlight" content="no" />
         <link rel="indexnow" href="https://btl-tv.com/34ca8fee16d64bc4bb0eb2477b72a4ef.txt" />
         <meta name="msvalidate.01" content={process.env.BING_VERIFICATION_CODE ?? "your-bing-verification-code-here"} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "Be The Light Television",
+              alternateName: "BTL TV",
+              url: "https://btl-tv.com",
+              logo: "https://btl-tv.com/images/logo/btl-logo.webp",
+              sameAs: [
+                "https://www.youtube.com/@btltv",
+                "https://www.facebook.com/btltv",
+                "https://www.instagram.com/btltv",
+                "https://soundcloud.com/user-549013936",
+              ],
+              address: {
+                "@type": "PostalAddress",
+                streetAddress: "Westeinde 21",
+                postalCode: "8064 AJ",
+                addressLocality: "Zwartsluis",
+                addressCountry: "NL",
+              },
+              description: "BTL TV is a Christian faith-based television platform broadcasting in Urdu for Pakistani-speaking communities worldwide.",
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              url: "https://btl-tv.com",
+              name: "BTL TV — Be The Light Television",
+              description: "Christian faith-based television broadcasting in Urdu. Watch devotional programs, talk shows, dramas, and the Urdu Audio Bible.",
+              potentialAction: {
+                "@type": "SearchAction",
+                target: {
+                  "@type": "EntryPoint",
+                  urlTemplate: "https://btl-tv.com/shows?q={search_term_string}",
+                },
+                "query-input": "required name=search_term_string",
+              },
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "ItemList",
+              itemListElement: [
+                { "@type": "SiteNavigationElement", name: "Home", url: "https://btl-tv.com" },
+                { "@type": "SiteNavigationElement", name: "Shows", url: "https://btl-tv.com/shows" },
+                { "@type": "SiteNavigationElement", name: "Live TV", url: "https://btl-tv.com/live" },
+                { "@type": "SiteNavigationElement", name: "Bible School", url: "https://btl-tv.com/bible-school" },
+                { "@type": "SiteNavigationElement", name: "About", url: "https://btl-tv.com/about" },
+                { "@type": "SiteNavigationElement", name: "Stichting", url: "https://btl-tv.com/stichting" },
+                { "@type": "SiteNavigationElement", name: "Team", url: "https://btl-tv.com/team" },
+                { "@type": "SiteNavigationElement", name: "Kids", url: "https://btl-tv.com/kids" },
+                { "@type": "SiteNavigationElement", name: "Donation", url: "https://btl-tv.com/donation" },
+                { "@type": "SiteNavigationElement", name: "Contact", url: "https://btl-tv.com/contact" },
+              ],
+            }),
+          }}
+        />
       </head>
       <body
         suppressHydrationWarning

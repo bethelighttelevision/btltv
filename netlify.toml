@@ -1,10 +1,5 @@
 [build]
   command = "npm run build"
-  publish = "out"
-
-# Disable Next.js runtime — this is a static export site
-[build.environment]
-  NETLIFY_NEXT_RUNTIME = "false"
 
 # Redirect www to non-www (btl-tv.com)
 [[redirects]]
@@ -12,12 +7,6 @@
   to = "https://btl-tv.com/:splat"
   status = 301
   force = true
-
-# SPA fallback — all routes serve index.html
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
 
 # Security & Performance Headers
 [[headers]]

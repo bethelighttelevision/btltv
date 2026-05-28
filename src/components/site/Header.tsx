@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Menu, Cross, Sparkles, Tv, Play, Flame, BookMarked, BookOpen, Building2, Users, Baby, Heart, FileText, Phone } from "lucide-react";
+import { Menu, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { toast } from "sonner";
@@ -30,10 +30,7 @@ export default function Header() {
       }
     };
     requestAnimationFrame(detectPWA);
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setPwaInstallPrompt(e as BeforeInstallPromptEvent);
-    };
+    const handler = (e: Event) => { e.preventDefault(); setPwaInstallPrompt(e as BeforeInstallPromptEvent); };
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
@@ -53,30 +50,19 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-btl-darker/95 backdrop-blur-md border-b border-border/30">
       <div className="flex items-center justify-between px-4 md:px-6 h-14">
         <Link href="/" className="flex items-center gap-2 shrink-0">
-          <img src="/images/logo/btl-logo.webp" alt="BTL TV" width={500} height={500} className="h-8 w-auto object-contain" />
+          <img src="/images/logo/btl-logo.webp" alt="BTL TV" width={500} height={500} className="h-8 w-auto object-contain eternal-flame" />
         </Link>
 
         {pwaInstallPrompt && !isStandalone && (
-          <Button
-            className="hidden md:flex bg-btl-red hover:bg-btl-red-dark text-white text-xs h-8 px-3 mr-2"
-            onClick={async () => {
-              await pwaInstallPrompt.prompt();
-              setPwaInstallPrompt(null);
-            }}
-          >
-            <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-            Install App
+          <Button className="hidden md:flex bg-btl-red hover:bg-btl-red-dark text-white text-xs h-8 px-3 mr-2"
+            onClick={async () => { await pwaInstallPrompt.prompt(); setPwaInstallPrompt(null); }}>
+            <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Install App
           </Button>
         )}
         {isIos && !isStandalone && showIosInstall && (
-          <Button
-            className="hidden md:flex bg-btl-red hover:bg-btl-red-dark text-white text-xs h-8 px-3 mr-2"
-            onClick={() => {
-              toast.info('Tap the Share button (⬆) in Safari, then "Add to Home Screen"');
-            }}
-          >
-            <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-            Install App
+          <Button className="hidden md:flex bg-btl-red hover:bg-btl-red-dark text-white text-xs h-8 px-3 mr-2"
+            onClick={() => { toast.info('Tap the Share button (⬆) in Safari, then "Add to Home Screen"'); }}>
+            <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Install App
           </Button>
         )}
 
@@ -84,14 +70,8 @@ export default function Header() {
           {NAV_LINKS.map((link) => {
             const active = isActive(link.key);
             return (
-              <Link
-                key={link.key}
-                href={getHref(link.key)}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${active
-                    ? "bg-btl-red text-white"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/5"
-                  }`}
-              >
+              <Link key={link.key} href={getHref(link.key)}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${active ? "bg-btl-red text-white" : "text-muted-foreground hover:text-foreground hover:bg-white/5"}`}>
                 {link.label}
               </Link>
             );
@@ -113,41 +93,23 @@ export default function Header() {
               {NAV_LINKS.map((link) => {
                 const active = isActive(link.key);
                 return (
-                  <Link
-                    key={link.key}
-                    href={getHref(link.key)}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${active
-                        ? "bg-btl-red text-white"
-                        : "text-muted-foreground hover:text-foreground hover:bg-white/5"
-                      }`}
-                  >
+                  <Link key={link.key} href={getHref(link.key)} onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${active ? "bg-btl-red text-white" : "text-muted-foreground hover:text-foreground hover:bg-white/5"}`}>
                     <link.icon className="h-4 w-4" />
                     {link.label}
                   </Link>
                 );
               })}
               {pwaInstallPrompt && !isStandalone && (
-                <button
-                  onClick={async () => {
-                    await pwaInstallPrompt.prompt();
-                    setPwaInstallPrompt(null);
-                  }}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium bg-btl-red text-white mt-2"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  Install App
+                <button onClick={async () => { await pwaInstallPrompt.prompt(); setPwaInstallPrompt(null); }}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium bg-btl-red text-white mt-2">
+                  <Sparkles className="h-4 w-4" /> Install App
                 </button>
               )}
               {isIos && !isStandalone && showIosInstall && (
-                <button
-                  onClick={() => {
-                    toast.info('Tap the Share button (⬆) in Safari, then "Add to Home Screen"');
-                  }}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium bg-btl-red text-white mt-2"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  Install App
+                <button onClick={() => { toast.info('Tap the Share button (⬆) in Safari, then "Add to Home Screen"'); }}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium bg-btl-red text-white mt-2">
+                  <Sparkles className="h-4 w-4" /> Install App
                 </button>
               )}
             </div>

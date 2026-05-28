@@ -16,7 +16,7 @@ module.exports = {
   robotsTxtOptions: {
     policies: [
       { userAgent: "*", allow: "/" },
-      { userAgent: "*", disallow: ["/admin", "/dashboard", "/profile", "/auth", "/api"] },
+      { userAgent: "*", disallow: ["/admin", "/dashboard", "/profile", "/auth", "/api", "/forgot-password", "/reset-password", "/bible-school/course"] },
     ],
   },
   transform: async (config, path) => {

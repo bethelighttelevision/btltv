@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import Header from "@/components/site/Header";
 import Footer from "@/components/site/Footer";
 
+
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const mainRef = useRef<HTMLDivElement>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);

@@ -39,6 +39,7 @@ export interface Episode {
 export interface Program {
   id: string;
   title: string;
+  slug: string;
   poster: string;
   category: string;
   description: string;
@@ -59,7 +60,31 @@ export interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-// ─── Navigation ──────────────────────────────────────────────────────
+// ─── Desktop Nav Items ────────────────────────────────────────────────
+export interface NavItem {
+  key: string;
+  label: string;
+  href: string;
+}
+
+export const DESKTOP_NAV: NavItem[] = [
+  { key: "home", label: "Home", href: "/" },
+  { key: "shows", label: "Shows", href: "/shows" },
+  { key: "live", label: "Live TV", href: "/live" },
+  { key: "bible-school", label: "Bible School", href: "/bible-school" },
+  { key: "about", label: "About", href: "/about" },
+];
+
+export const MORE_ITEMS: NavItem[] = [
+  { key: "stichting", label: "Stichting", href: "/stichting" },
+  { key: "team", label: "Team", href: "/team" },
+  { key: "kids", label: "Kids", href: "/kids" },
+  { key: "donation", label: "Donation", href: "/donation" },
+  { key: "reports", label: "Reports", href: "/reports" },
+  { key: "contact", label: "Contact", href: "/contact" },
+];
+
+// Legacy flat nav links (for footer, backward compat)
 export const NAV_LINKS = [
   { key: "home", label: "Home", icon: Tv },
   { key: "shows", label: "Shows", icon: Play },
@@ -79,6 +104,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEL1XcXiXO76FeMysmOQda-v",
     title: "Debate",
+    slug: "debate",
     poster: "/images/programs/debate.webp",
     category: "TALK SHOW",
     description: "Christian apologetics and theological debates with scholars and experts.",
@@ -86,6 +112,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEL-7g_5Zt4nmcj1tKUMVlDJ",
     title: "Connection",
+    slug: "connection",
     poster: "/images/programs/connection.webp",
     category: "TALK SHOW",
     description: "A youth program connecting faith with everyday life and biblical truths.",
@@ -93,6 +120,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEJty_pIPyX862w551dRhSPC",
     title: "295C",
+    slug: "295c",
     poster: "/images/programs/295c.webp",
     category: "SOCIAL ISSUES",
     description: "Discussing Pakistan's blasphemy laws and their impact on minority communities.",
@@ -100,6 +128,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEL3jSy9_haZ0IwwVnEOM502",
     title: "Meri Aawaz Suno",
+    slug: "meri-aawaz-suno",
     poster: "/images/programs/meri-awaz-suno.webp",
     category: "TALK SHOW",
     description: "Giving voice to the voiceless — highlighting injustice and advocating for the oppressed.",
@@ -107,6 +136,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEJJU9cHbZ_aZHkQuQKtG353",
     title: "Bol K Lab Azad Hain Tere",
+    slug: "bol-k-lab-azad-hain-tere",
     poster: "/images/programs/bol-k-lub-azad-hai-tere.webp",
     category: "TALK SHOW",
     description: "Speak freely — exploring women's roles in the Bible and society.",
@@ -114,6 +144,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEK78XGqgSzTgYovHc6M6l3M",
     title: "Ora et Labora",
+    slug: "ora-et-labora",
     poster: "/images/programs/ora-et-labora.webp",
     category: "DOCUMENTARY",
     description: "Pray and Work — documentary series featuring Christian businesses and their faith journeys.",
@@ -121,6 +152,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEJHTsKT-ccjvRsQ7wq0zhNA",
     title: "Ochtend met Jezus | Predikant Douwe Wijmenga",
+    slug: "ochtend-met-jezus-predikant-douwe-wijmenga",
     poster: "/images/programs/morning-with-jesus-predikant-douwe-wijmenga.webp",
     category: "DEVOTIONAL",
     description: "Morning devotionals in Dutch with Predikant Douwe Wijmenga, studying the Gospel of Mark.",
@@ -128,6 +160,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEK2HGhHh6ju0UAbR4GPpv_h",
     title: "Masihi Zindagi",
+    slug: "masihi-zindagi",
     poster: "https://i.ytimg.com/vi/pX1ngNLVn30/hqdefault.jpg",
     category: "DEVOTIONAL",
     description: "Christian Life — practical teachings on living a faith-filled life.",
@@ -135,6 +168,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEJ5atmrt0aNyTJTbBRk8Dtd",
     title: "Yesu Sang Sawera | Pastor Munawar Virk",
+    slug: "yesu-sang-sawera-pastor-munawar-virk",
     poster: "/images/programs/yesu-sang-sawera-pastor-munawar-virk.webp",
     category: "DEVOTIONAL",
     description: "Morning with Jesus — daily devotional with Pastor Munawar Virk.",
@@ -142,6 +176,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEK59AdKYUxvjD4FYGGAk-3W",
     title: "Yesu Sang Sawera | Pastor Imran Gill",
+    slug: "yesu-sang-sawera-pastor-imran-gill",
     poster: "/images/programs/yesu-sang-sawera-pastor-imran-gill.webp",
     category: "DEVOTIONAL",
     description: "Morning with Jesus — daily devotional with Pastor Imran Gill.",
@@ -149,6 +184,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEJjSOc-b5azFbgnCgy27PFx",
     title: "Yesu Sang Sawera | Predikant Imko Postma",
+    slug: "yesu-sang-sawera-predikant-imko-postma",
     poster: "/images/programs/ochtend-met-jezus-predikant-imko-postma.webp",
     category: "DEVOTIONAL",
     description: "Morning with Jesus — devotional with Predikant Imko Postma.",
@@ -156,6 +192,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEJIkPavJjvPDX1eslj5q2Mt",
     title: "Yesu Sang Sawera | Pastor Sarfaraz Rehmat",
+    slug: "yesu-sang-sawera-pastor-sarfaraz-rehmat",
     poster: "/images/programs/yesu-sang-sawera-pastor-sarfaraz-rehmat.webp",
     category: "DEVOTIONAL",
     description: "Morning with Jesus — daily devotional with Pastor Sarfaraz Rehmat.",
@@ -163,6 +200,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEIR35NdZTLISgKRMlc3BVw3",
     title: "Morning With Jesus | Pastor Robert Slack",
+    slug: "morning-with-jesus-pastor-robert-slack",
     poster: "/images/programs/morning-with-jesus-pastor-robert-slack.webp",
     category: "DEVOTIONAL",
     description: "Morning devotional with Pastor Robert Slack.",
@@ -170,6 +208,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEKa9nRM45q3IjtjnEcxx8Oq",
     title: "Ochtend met Jezus | Predikant Terpstra",
+    slug: "ochtend-met-jezus-predikant-terpstra",
     poster: "/images/programs/ochtend-met-jezus-pastor-terpstra.webp",
     category: "DEVOTIONAL",
     description: "Morning devotionals in Dutch with Predikant Terpstra.",
@@ -177,6 +216,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEI_mnwHqbtFVWkoBepRVJYz",
     title: "Yesu Sang Sawera | Pastor Parvaiz Iqbal",
+    slug: "yesu-sang-sawera-pastor-parvaiz-iqbal",
     poster: "/images/programs/yesu-sang-sawera-pastor-parvaiz-iqbal.webp",
     category: "DEVOTIONAL",
     description: "Morning with Jesus — devotional through the liturgical calendar with Pastor Parvaiz Iqbal.",
@@ -184,6 +224,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEIM81Nxga6kBzrWTI4zKW6B",
     title: "Yesu Sang Sawera | Bishop Emmanuel Aftab",
+    slug: "yesu-sang-sawera-bishop-emmanuel-aftab",
     poster: "/images/programs/yesu-sang-sawera-bishop-emmanuel-aftab.webp",
     category: "DEVOTIONAL",
     description: "Morning with Jesus — daily devotional with Bishop Emmanuel Aftab.",
@@ -191,6 +232,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEJmdYO0rgoAyxHvufDMRqey",
     title: "Puray Dil Se",
+    slug: "puray-dil-se",
     poster: "/images/programs/puray-dil-se.webp",
     category: "DEVOTIONAL",
     description: "With All Your Heart — heartfelt worship and devotional program.",
@@ -198,6 +240,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEJf5LpXqJUB7BOPTIxxYE4Y",
     title: "Tehqeeq-E-Bible",
+    slug: "tehqeeqebible",
     poster: "https://i.ytimg.com/vi/-vE4aOXdFU8/hqdefault.jpg",
     category: "DEVOTIONAL",
     description: "Bible Research — in-depth study and investigation of biblical texts.",
@@ -205,6 +248,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEJTLA68BSOZiawjHha_STu6",
     title: "Farman-e-Masih",
+    slug: "farmanemasih",
     poster: "/images/programs/farman-e-masih.webp",
     category: "DEVOTIONAL",
     description: "Commandment of Christ — teachings from the words of Jesus.",
@@ -212,6 +256,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEKieg3BaUFw9Awo951JERSq",
     title: "Azmat-E-Masih",
+    slug: "azmatemasih",
     poster: "https://i.ytimg.com/vi/C4Q5lYDdKZg/hqdefault.jpg",
     category: "DEVOTIONAL",
     description: "Glory of Christ — exploring the majesty and divinity of Jesus Christ.",
@@ -219,6 +264,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiELEXZy_VRdLOII3zDpXYh-m",
     title: "Choti Si Baat",
+    slug: "choti-si-baat",
     poster: "/images/programs/choti-si-baat.webp",
     category: "TALK SHOW",
     description: "A Small Matter — conversations about everyday faith and life.",
@@ -226,6 +272,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEJD0sPwhLDZKTexs0RhHtTk",
     title: "Aao Hamad Karin",
+    slug: "aao-hamad-karin",
     poster: "https://i.ytimg.com/vi/9JdEOSZFiLs/hqdefault.jpg",
     category: "DEVOTIONAL",
     description: "Come Let's Praise — worship and praise program.",
@@ -233,6 +280,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEKswX3Uhy-Rbc_v8oZGWoaN",
     title: "Food for Your Heart",
+    slug: "food-for-your-heart",
     poster: "https://i.ytimg.com/vi/Ul0WTSmDN2M/hqdefault.jpg",
     category: "DEVOTIONAL",
     description: "Spiritual nourishment for your soul — health and faith combined.",
@@ -240,6 +288,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEJzzhjty0HYs02WBzM4Y7G1",
     title: "Yesu Sang Sawera | Pastor Nadeem K Dean",
+    slug: "yesu-sang-sawera-pastor-nadeem-k-dean",
     poster: "/images/programs/yesu-sang-sawera-pastor-nadeem-k-dean.webp",
     category: "DEVOTIONAL",
     description: "Morning with Jesus — daily devotional with Pastor Nadeem K Dean.",
@@ -247,6 +296,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEJzd_BEgTrtW25He9bc5ykP",
     title: "Daagh",
+    slug: "daagh",
     poster: "/images/programs/daag.webp",
     category: "DRAMA",
     description: "Stain — drama addressing forced conversions and social injustice.",
@@ -254,6 +304,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEJviSmXh9ffFJ57rLQcS84A",
     title: "Meri Kahani",
+    slug: "meri-kahani",
     poster: "https://i.ytimg.com/vi/_URLEq-amhM/hqdefault.jpg",
     category: "DRAMA",
     description: "My Story — true testimonies of Muslim converts to Christianity.",
@@ -261,6 +312,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEKhqfRdSq7N9syvs31FNUQU",
     title: "Bandhan",
+    slug: "bandhan",
     poster: "/images/programs/bandhan.webp",
     category: "DRAMA",
     description: "Bond — dramatic series exploring relationships and faith.",
@@ -268,6 +320,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEIub8WrDOvvwOfy2VMA8wV2",
     title: "BTL Drama Specials",
+    slug: "btl-drama-specials",
     poster: "https://i.ytimg.com/vi/KF9HGJn_mno/hqdefault.jpg",
     category: "DRAMA",
     description: "Special drama productions and short stories from BTL TV.",
@@ -275,6 +328,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEIez3wRZiuJ3uIAVeqO8UAk",
     title: "Aap Ki Sehat",
+    slug: "aap-ki-sehat",
     poster: "/images/programs/aap-ki-sehat.webp",
     category: "HEALTH",
     description: "Your Health — health awareness program covering mental and physical wellbeing.",
@@ -282,6 +336,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEJappsAzGuHckX-6Tnv3e0C",
     title: "Return Ticket",
+    slug: "return-ticket",
     poster: "/images/programs/return-ticket.webp",
     category: "DRAMA",
     description: "Drama exploring the journey of life — are we physical or spiritual beings?",
@@ -289,6 +344,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEIXhIrONRD0BUJOfT02hwOZ",
     title: "Aao Chalein",
+    slug: "aao-chalein",
     poster: "/images/programs/aao-chalein.webp",
     category: "DOCUMENTARY",
     description: "Let's Go — documentary covering social issues, human rights, and community events.",
@@ -296,6 +352,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEJJUdDkkF1ErTjG92L6u4bq",
     title: "Such Ki Khooj",
+    slug: "such-ki-khooj",
     poster: "https://i.ytimg.com/vi/1x6dYFEObWM/hqdefault.jpg",
     category: "DOCUMENTARY",
     description: "Search for Truth — investigative series exploring truth and faith.",
@@ -303,6 +360,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiELmNtPpNsAFdD5R0DuHsc57",
     title: "Safar-e-Shanakhat",
+    slug: "safareshanakhat",
     poster: "/images/programs/safar-e-shanakht.webp",
     category: "DOCUMENTARY",
     description: "Journey of Identity — documentary exploring Christian identity and heritage.",
@@ -310,6 +368,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEKFnSQS_7_yzCXlBVE14c9K",
     title: "Career Guide",
+    slug: "career-guide",
     poster: "/images/programs/career-guide.webp",
     category: "EDUCATION",
     description: "Career guidance and professional development for youth.",
@@ -317,6 +376,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiELF-r1NYnvutDhWwFA_PuWb",
     title: "Hamare Sitare",
+    slug: "hamare-sitare",
     poster: "/images/programs/hamarey-sitarey.webp",
     category: "TALK SHOW",
     description: "Our Stars — interviews with prominent Christian leaders and personalities.",
@@ -324,6 +384,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEL62fRR7QFYnybfId__kUGp",
     title: "Pakistan Hamara Bhi Hai",
+    slug: "pakistan-hamara-bhi-hai",
     poster: "/images/programs/pakistan-hamara-bhi-hai.webp",
     category: "SOCIAL ISSUES",
     description: "Pakistan Is Ours Too — advocating for minority rights and equal citizenship.",
@@ -331,27 +392,15 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEJ5r54n700_prgbhdZExCJG",
     title: "BTL TV News & Updates",
+    slug: "btl-tv-news-updates",
     poster: "/images/programs/news.webp",
     category: "NEWS",
     description: "Official updates and news from Be The Light Television.",
   },
   {
-    id: "PLC0Rch0KTiEJ6w6w6w6w6w",
-    title: "Jawab Tu Hai",
-    poster: "/images/programs/jawab-tu-hai.webp",
-    category: "TALK SHOW",
-    description: "A talk show exploring answers to life's big questions through the lens of faith.",
-  },
-  {
-    id: "MORNING_JESUS_POPOOLA",
-    title: "Morning With Jesus | Pastor Oluwabukunmi Popoola",
-    poster: "https://i.ytimg.com/vi/E73nvG7jm2o/hqdefault.jpg",
-    category: "DEVOTIONAL",
-    description: "Morning devotional with Pastor Oluwabukunmi Popoola.",
-  },
-  {
     id: "PLC0Rch0KTiEJU6V0fg9XydpOjM8Yp0eAY",
     title: "Yesu Sang Sawera | Pastor William Paighani",
+    slug: "yesu-sang-sawera-pastor-william-paighani",
     poster: "https://i.ytimg.com/vi/yl1M9TTo0TM/hqdefault.jpg",
     category: "DEVOTIONAL",
     description: "Morning with Jesus — daily devotional with Pastor William Paighani.",
@@ -359,6 +408,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEIXuKgpvm7mq4YlLQ__HssQ",
     title: "Urdu Bible",
+    slug: "urdu-bible",
     poster: "https://i.ytimg.com/vi/6bjIhLSE504/hqdefault.jpg",
     category: "DEVOTIONAL",
     description: "Complete Urdu Bible — audio readings of Genesis, Exodus, Proverbs, Gospels, and more.",
@@ -370,6 +420,7 @@ export const KIDS_PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEINBNsxKVWV5gXlu8EmlWV0",
     title: "Prophecies About Jesus Christ",
+    slug: "prophecies-about-jesus-christ",
     poster: "https://i.ytimg.com/vi/M_efw5g34gs/hqdefault.jpg",
     category: "KIDS",
     description: "Biblical prophecies about Jesus Christ explained for children.",
@@ -377,6 +428,7 @@ export const KIDS_PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiEJ4Ys17Q2GyDerDxuUkhe2z",
     title: "Kids Stories",
+    slug: "kids-stories",
     poster: "https://i.ytimg.com/vi/3v5dYvZweHg/hqdefault.jpg",
     category: "KIDS",
     description: "Bible stories told in a fun and engaging way for kids.",
@@ -384,6 +436,7 @@ export const KIDS_PROGRAMS: Program[] = [
   {
     id: "PLC0Rch0KTiELwlkkreDtcIdxhPmASJbpJ",
     title: "Kids Programe | Bible Study",
+    slug: "kids-programe-bible-study",
     poster: "https://i.ytimg.com/vi/j0CU07nX-vg/hqdefault.jpg",
     category: "KIDS",
     description: "Bible study programs designed specially for children.",
@@ -409,8 +462,8 @@ export const TEAM_GROUPS = [
     title: "Leadership",
     icon: Crown,
     members: [
-      { name: "Gasper Daniel", role: "CEO & Founder", image: "/images/team/Gasper%20Daniel%20CEO%20&%20Founder.png" },
-      { name: "Sumble Noreen", role: "Vice President", image: "/images/team/Sumble%20Noreen%20Vice%20President.png" },
+      { name: "Gasper Daniel", role: "CEO & Founder", image: "/images/team/gasper-daniel-ceo.png" },
+      { name: "Sumble Noreen", role: "Vice President", image: "/images/team/sumble-noreen-vp.png" },
       { name: "Sahir Alam", role: "Head of Audio & Video", image: "/images/team/sahir-alam.webp" },
     ],
   },
@@ -418,10 +471,10 @@ export const TEAM_GROUPS = [
     title: "Office",
     icon: Briefcase,
     members: [
-      { name: "Karal Yohana", role: "Head of Department", image: "/images/team/Karal%20Yohana%20Head%20of%20Department.png" },
+      { name: "Karal Yohana", role: "Head of Department", image: "/images/team/karal-yohana-hod.png" },
       { name: "Nayyar Noel", role: "Co-Ordinator", image: "/images/team/nayyar-noel.webp" },
-      { name: "Khisal Daniel", role: "Director of Photography", image: "/images/team/Khisal%20Daniel%20Director%20of%20Photography.png" },
-      { name: "Minahil Daniel", role: "Director of Photography", image: "/images/team/Minahil%20Daniel%20Director%20of%20Photography.png" },
+      { name: "Khisal Daniel", role: "Director of Photography", image: "/images/team/khisal-daniel-dop.png" },
+      { name: "Minahil Daniel", role: "Director of Photography", image: "/images/team/minahil-daniel-dop.png" },
     ],
   },
   {
@@ -512,6 +565,16 @@ export function getEpisodes(playlistId: string): Episode[] {
 
 export function getEpisodeCount(playlistId: string): number {
   return getEpisodes(playlistId).length;
+}
+
+export const ALL_SHOWS: Program[] = [...PROGRAMS, ...KIDS_PROGRAMS];
+
+export function getProgramBySlug(slug: string): Program | undefined {
+  return ALL_SHOWS.find((p) => p.slug === slug);
+}
+
+export function getProgramById(id: string): Program | undefined {
+  return ALL_SHOWS.find((p) => p.id === id);
 }
 
 export function decodeHtmlEntities(text: string): string {

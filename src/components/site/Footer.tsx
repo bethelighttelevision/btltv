@@ -19,7 +19,7 @@ export default function Footer() {
         {/* Mobile: ultra-compact horizontal layout */}
         <div className="md:hidden space-y-2">
           <div className="flex items-center justify-between">
-            <img src="/images/logo/btl-logo.webp" alt="BTL TV" width={500} height={500} className="h-5 w-auto object-contain" />
+            <img src="/images/logo/btl-logo.webp" alt="BTL TV" width={500} height={500} className="h-5 w-auto object-contain eternal-flame" />
             <div className="flex gap-2">
               <button className="text-muted-foreground hover:text-btl-red" onClick={() => window.open("https://www.youtube.com/@btltv", "_blank")}>
                 <Youtube className="h-4 w-4" />
@@ -50,7 +50,7 @@ export default function Footer() {
         {/* Desktop footer */}
         <div className="hidden md:grid grid-cols-4 gap-6 mb-6">
           <div>
-            <img src="/images/logo/btl-logo.webp" alt="BTL TV" width={500} height={500} className="h-8 w-auto object-contain mb-3" />
+            <img src="/images/logo/btl-logo.webp" alt="BTL TV" width={500} height={500} className="h-8 w-auto object-contain mb-3 eternal-flame" />
             <p className="text-xs text-muted-foreground leading-relaxed">
               Be The Light Television — spreading the Gospel of Jesus Christ to Urdu-speaking communities worldwide.
             </p>

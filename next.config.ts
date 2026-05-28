@@ -5,6 +5,12 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   reactStrictMode: true,
+  async redirects() {
+    return [
+      { source: "/index.html", destination: "/", permanent: true },
+      { source: "/home", destination: "/", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;
