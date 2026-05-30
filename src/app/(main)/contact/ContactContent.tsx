@@ -38,7 +38,7 @@ export default function ContactContent() {
       formData.append("subject", subject || "General Inquiry");
       formData.append("message", message);
       formData.append("_template", "table");
-      const res = await fetch("https://formsubmit.co/ajax/admin@btl-tv.com", { method: "POST", body: formData });
+      const res = await fetch("https://formsubmit.co/ajax/contact@btl-tv.com", { method: "POST", body: formData });
       if (!res.ok) throw new Error("Send failed");
       toast.success("Message sent successfully! We'll get back to you soon.");
       setName(""); setEmail(""); setPhone(""); setSubject(""); setMessage("");
@@ -109,9 +109,9 @@ export default function ContactContent() {
                 </Button>
               </form>
               <div className="mt-4 pt-4 border-t border-border/20 text-center">
-                <p className="text-xs text-muted-foreground mb-3">Prefer instant messaging?</p>
-                <a href="https://wa.me/31685097840" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[#25D366] hover:text-[#20bd5a] text-sm font-medium transition-colors">
-                  Chat on WhatsApp →
+                <p className="text-xs text-muted-foreground mb-3">Or email us directly:</p>
+                <a href="mailto:contact@btl-tv.com" className="inline-flex items-center gap-2 text-btl-red hover:text-btl-red/80 text-sm font-medium transition-colors">
+                  contact@btl-tv.com →
                 </a>
               </div>
             </CardContent>
@@ -128,7 +128,7 @@ export default function ContactContent() {
                 {[
                   { icon: MapPin, label: "Address", value: "Westeinde 21, 8064 AJ Zwartsluis" },
                   { icon: Phone, label: "Phone / WhatsApp", value: "https://wa.me/31685097840", link: true },
-                  { icon: Mail, label: "Email", value: "admin@btl-tv.com", mail: true },
+                  { icon: Mail, label: "Email", value: "contact@btl-tv.com", mail: true },
                 ].map((item) => (
                   <div key={item.label} className="flex items-start gap-4">
                     <div className="h-11 w-11 rounded-lg bg-btl-red/10 flex items-center justify-center shrink-0"><item.icon className="h-5 w-5 text-btl-red" /></div>
