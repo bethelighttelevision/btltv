@@ -300,12 +300,34 @@ function HomePage() {
                 viewport={{ once: true }}
                 className="flex flex-wrap items-center gap-3 mt-6 justify-center md:justify-start"
               >
-                <a href="/api/download">
-                  <Button size="lg" className="bg-btl-red hover:bg-btl-red-dark text-white font-semibold min-h-[48px] px-8 shadow-lg shadow-btl-red/25">
-                    <Smartphone className="h-5 w-5 mr-2" />
-                    Download APK
-                  </Button>
-                </a>
+                <motion.a
+                  href="/api/download"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <motion.div
+                    className="relative"
+                    animate={{ boxShadow: ["0 0 0 0 rgba(229,9,20,0.4)", "0 0 0 12px rgba(229,9,20,0)", "0 0 0 0 rgba(229,9,20,0.4)"] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    style={{ borderRadius: "8px" }}
+                  >
+                    <Button size="lg" className="relative bg-btl-red hover:bg-btl-red-dark text-white font-semibold min-h-[48px] px-8 shadow-lg shadow-btl-red/25 overflow-hidden">
+                      <motion.span
+                        animate={{ rotate: [0, -10, 10, -10, 0] }}
+                        transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
+                        className="inline-flex mr-2"
+                      >
+                        <Smartphone className="h-5 w-5" />
+                      </motion.span>
+                      <span className="relative z-10">Download APK</span>
+                      <motion.span
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                        animate={{ x: ["-100%", "100%"] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", repeatDelay: 3 }}
+                      />
+                    </Button>
+                  </motion.div>
+                </motion.a>
                 <p className="text-xs text-muted-foreground">Free · 92 MB · Android 8+</p>
               </motion.div>
             </div>
