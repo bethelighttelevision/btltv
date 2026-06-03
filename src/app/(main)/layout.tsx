@@ -77,6 +77,14 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
+              <a href="/api/download" target="_blank" rel="noreferrer">
+                <Button
+                  size="sm"
+                  className="bg-btl-red hover:bg-btl-red-dark text-white text-xs h-8 px-3"
+                >
+                  APK
+                </Button>
+              </a>
               {pwaInstallPrompt ? (
                 <Button
                   size="sm"

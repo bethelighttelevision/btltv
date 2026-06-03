@@ -12,6 +12,7 @@ import {
   Drama,
   Headphones,
   Cross,
+  Smartphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -252,6 +253,40 @@ function HomePage() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Download App Section */}
+      <section className="py-8 md:py-12">
+        <div className="px-4 md:px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-btl-red/20 via-btl-card to-btl-red/10 border border-btl-red/30"
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(229,9,20,0.15),transparent_70%)]" />
+            <div className="relative p-6 md:p-10 flex flex-col md:flex-row items-center gap-6 md:gap-10">
+              <div className="h-20 w-20 md:h-28 md:w-28 rounded-2xl bg-btl-red/20 flex items-center justify-center shrink-0">
+                <Smartphone className="h-10 w-10 md:h-14 md:w-14 text-btl-red" />
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground">Get the BTL TV App</h2>
+                <p className="text-sm md:text-base text-muted-foreground mt-2 max-w-xl">
+                  Download the official Android app for the best experience — watch live TV, browse all shows, listen to the Audio Bible, and more, all in one place.
+                </p>
+                <div className="flex flex-wrap items-center gap-3 mt-4 justify-center md:justify-start">
+                  <a href="/api/download">
+                    <Button size="lg" className="bg-btl-red hover:bg-btl-red-dark text-white font-semibold min-h-[48px] px-8">
+                      <Smartphone className="h-5 w-5 mr-2" />
+                      Download APK
+                    </Button>
+                  </a>
+                  <p className="text-[11px] text-muted-foreground">Free · 92 MB · Android 8+</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 

@@ -90,6 +90,18 @@ model Enrollment {
   @@unique([userId, courseId])
 }
 
+model AppDownload {
+  id        String   @id @default(cuid())
+  platform  String   @default("android")
+  version   String   @default("1.0.0")
+  ip        String?
+  city      String?
+  country   String?
+  userAgent String?
+  referrer  String?
+  createdAt DateTime @default(now())
+}
+
 model Post {
   id        String   @id @default(cuid())
   title     String

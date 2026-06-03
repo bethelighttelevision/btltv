@@ -97,6 +97,7 @@ export const NAV_LINKS = [
   { key: "donation", label: "Donation", icon: Heart },
   { key: "reports", label: "Reports", icon: FileText },
   { key: "contact", label: "Contact", icon: Phone },
+  { key: "download", label: "Download App", icon: Smartphone },
 ];
 
 // ─── Programs Data ───────────────────────────────────────────────────

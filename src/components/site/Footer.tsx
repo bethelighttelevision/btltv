@@ -41,6 +41,9 @@ export default function Footer() {
                 {link.label}
               </Link>
             ))}
+            <a href="/api/download" className="text-[10px] text-btl-red hover:text-btl-red-dark font-semibold transition-colors">
+              Download App
+            </a>
           </div>
           <p className="text-[9px] text-muted-foreground leading-tight">
             Westeinde 21, 8064 AJ Zwartsluis, NL · info@btl-tv.com
@@ -73,6 +76,9 @@ export default function Footer() {
                   {link.label}
                 </Link>
               ))}
+              <a href="/api/download" className="block text-xs text-btl-red hover:text-btl-red-dark font-semibold transition-colors mt-2">
+                Download App
+              </a>
             </div>
           </div>
           <div>
