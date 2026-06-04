@@ -9,7 +9,6 @@ import { NAV_LINKS } from "@/lib/site-data";
 export default function Footer() {
   const getHref = (key: string) => {
     if (key === "home") return "/";
-    if (key === "bible-school") return "/bible-school";
     return `/${key}`;
   };
 

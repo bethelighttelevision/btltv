@@ -24,7 +24,6 @@ import {
   PROGRAMS,
   KIDS_PROGRAMS,
   PARTNERS,
-  getProgramById,
 } from "@/lib/site-data";
 import ShowSection from "@/components/site/ShowSection";
 import SoundCloudSection from "@/components/site/SoundCloudSection";
@@ -35,13 +34,27 @@ import PhoneMockup from "@/components/site/PhoneMockup";
 function HomePage() {
   const router = useRouter();
   const [heroIndex, setHeroIndex] = useState(0);
+  const [dbHero, setDbHero] = useState<typeof HERO_SHOWS>(HERO_SHOWS);
+
+  useEffect(() => {
+    fetch("/api/public?page=home")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.content?.heroBanner) {
+          setDbHero([{ title: data.content.pageTitle || "Be The Light Television", subtitle: data.content.tagline || "Urdu Christian Broadcasting", image: data.content.heroBanner, programId: "" }]);
+        }
+      })
+      .catch(() => null);
+  }, []);
+
+  const heroItems = dbHero;
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setHeroIndex((prev) => (prev + 1) % HERO_SHOWS.length);
+      setHeroIndex((prev) => (prev + 1) % heroItems.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, []);
+  }, [heroItems.length]);
 
   const scrollContainer = useCallback(
     (key: string, direction: "left" | "right") => {
@@ -56,7 +69,7 @@ function HomePage() {
   const talkShows = PROGRAMS.filter((p) => p.category === "TALK SHOW");
   const dramaShows = PROGRAMS.filter((p) => p.category === "DRAMA");
 
-  const hero = HERO_SHOWS[heroIndex];
+  const hero = heroItems[heroIndex];
 
   return (
     <>
@@ -106,7 +119,7 @@ function HomePage() {
                 </p>
                 <div className="flex gap-2 sm:gap-3 mt-2 sm:mt-3 md:mt-5">
                   <Link
-                    href={hero.programId === "btl-logo" ? "/shows" : `/shows/${getProgramById(hero.programId)?.slug || hero.programId}`}
+                    href={hero.programId === "btl-logo" ? "/shows" : `/shows/${(PROGRAMS.find((p) => p.id === hero.programId) || KIDS_PROGRAMS.find((p) => p.id === hero.programId))?.slug || hero.programId}`}
                   >
                     <Button className="bg-btl-red hover:bg-btl-red-dark text-white font-semibold px-6 min-h-[44px]">
                       <Play className="h-4 w-4 mr-2 fill-current" />
@@ -125,7 +138,7 @@ function HomePage() {
               </motion.div>
             </AnimatePresence>
             <div className="flex gap-2 mt-4">
-              {HERO_SHOWS.map((_, idx) => (
+              {heroItems.map((_, idx) => (
                 <button
                   key={idx}
                   onClick={() => setHeroIndex(idx)}

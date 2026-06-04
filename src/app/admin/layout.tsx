@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import AdminShell from "./AdminShell";
+import AdminLayoutClient from "./AdminLayoutClient";
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard - BTL TV",
-  description: "Manage courses, lessons, and quizzes for BTL TV Bible School.",
+  title: "Admin Panel - BTL TV",
+  description: "BTL TV Admin Dashboard",
   robots: "noindex, nofollow",
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <AdminShell>{children}</AdminShell>;
+  return <AdminLayoutClient>{children}</AdminLayoutClient>;
 }

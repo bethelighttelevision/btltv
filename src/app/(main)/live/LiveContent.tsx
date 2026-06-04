@@ -1,14 +1,38 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Flame, Clock, Tv, Youtube } from "lucide-react";
+import { Flame, Clock, Tv, Youtube, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import HLSPlayer from "@/components/site/HLSPlayer";
 
 export default function LiveContent() {
+  const [liveData, setLiveData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/public?page=live", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data) => setLiveData(data?.live || null))
+      .catch(() => null)
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-btl-red" />
+      </div>
+    );
+  }
+
+  const isLive = liveData?.isLive === true;
+  const streamUrl = liveData?.streamUrl || "";
+  const offlineMsg = liveData?.offlineMessage || "";
+  const schedule = liveData?.schedule || "";
+
   return (
     <div className="min-h-screen">
       <div className="relative w-full overflow-hidden bg-gradient-to-b from-btl-dark via-btl-dark to-btl-dark">
@@ -16,8 +40,10 @@ export default function LiveContent() {
         <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 relative">
           <div className="flex items-center gap-4 mb-2">
             <div className="relative flex items-center gap-2">
-              <span className="animate-pulse-live inline-block h-3 w-3 rounded-full bg-btl-red shadow-[0_0_12px_rgba(229,9,20,0.6)]" />
-              <Badge className="bg-btl-red text-white font-bold text-xs px-3 py-1 animate-pulse shadow-[0_0_16px_rgba(229,9,20,0.3)]">LIVE NOW</Badge>
+              <span className={`inline-block h-3 w-3 rounded-full ${isLive ? "bg-btl-red animate-pulse shadow-[0_0_12px_rgba(229,9,20,0.6)]" : "bg-gray-500"}`} />
+              <Badge className={`${isLive ? "bg-btl-red animate-pulse" : "bg-gray-600"} text-white font-bold text-xs px-3 py-1`}>
+                {isLive ? "LIVE NOW" : "OFFLINE"}
+              </Badge>
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-foreground">Live TV</h1>
           </div>
@@ -27,23 +53,37 @@ export default function LiveContent() {
 
       <div className="max-w-5xl mx-auto px-4 md:px-6 -mt-2">
         <div className="relative rounded-xl overflow-hidden shadow-[0_0_40px_rgba(229,9,20,0.1),0_20px_60px_rgba(0,0,0,0.5)] bg-black border border-white/5">
-          <div className="aspect-video w-full"><HLSPlayer /></div>
+          <div className="aspect-video w-full">
+            {streamUrl ? <HLSPlayer src={streamUrl} /> : <HLSPlayer />}
+          </div>
           <div className="absolute top-0 left-0 right-0 p-3 flex items-center justify-between bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
             <div className="flex items-center gap-2">
               <img src="/images/logo/btl-logo.webp" alt="BTL TV" width={500} height={500} className="h-6 w-auto object-contain opacity-80" />
               <span className="text-white/60 text-xs font-medium">BTL TV — Be The Light Television</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="animate-pulse-live h-2 w-2 rounded-full bg-btl-red" />
-              <span className="text-white/60 text-[10px] uppercase tracking-wider font-bold">Live</span>
+              <span className={`h-2 w-2 rounded-full ${isLive ? "bg-btl-red animate-pulse" : "bg-gray-500"}`} />
+              <span className="text-white/60 text-[10px] uppercase tracking-wider font-bold">{isLive ? "Live" : "Offline"}</span>
             </div>
           </div>
         </div>
 
+        {!isLive && offlineMsg && (
+          <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-yellow-400 text-sm text-center">
+            {offlineMsg}
+          </div>
+        )}
+
         <div className="mt-8 space-y-6">
           <Card className="bg-btl-card border-btl-card-border overflow-hidden">
             <div className="bg-gradient-to-r from-btl-red/10 to-transparent p-4 md:p-6 border-b border-btl-card-border">
-              <div className="flex items-center gap-3"><Flame className="h-5 w-5 text-btl-red" /><h3 className="text-lg font-bold text-foreground">Now Playing</h3><Badge className="bg-btl-red text-white text-[10px] px-2 py-0.5 animate-pulse">LIVE</Badge></div>
+              <div className="flex items-center gap-3">
+                <Flame className="h-5 w-5 text-btl-red" />
+                <h3 className="text-lg font-bold text-foreground">Now Playing</h3>
+                <Badge className={`${isLive ? "bg-btl-red animate-pulse" : "bg-gray-600"} text-white text-[10px] px-2 py-0.5`}>
+                  {isLive ? "LIVE" : "OFFLINE"}
+                </Badge>
+              </div>
             </div>
             <CardContent className="p-4 md:p-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -58,31 +98,16 @@ export default function LiveContent() {
             </CardContent>
           </Card>
 
-          <Card className="bg-btl-card border-btl-card-border overflow-hidden">
-            <div className="bg-gradient-to-r from-btl-red/10 to-transparent p-4 md:p-6 border-b border-btl-card-border">
-              <div className="flex items-center gap-3"><Clock className="h-5 w-5 text-btl-red" /><h3 className="text-lg font-bold text-foreground">Program Schedule</h3></div>
-            </div>
-            <CardContent className="p-0">
-              <div className="divide-y divide-border/20">
-                {[
-                  { time: "6:00 AM", show: "Yesu Sang Sawera (Morning Devotional)" },
-                  { time: "8:00 AM", show: "Ochtend met Jezus (Dutch Devotional)" },
-                  { time: "10:00 AM", show: "Farman-e-Masih / Masihi Zindagi" },
-                  { time: "12:00 PM", show: "Talk Shows & Discussions" },
-                  { time: "2:00 PM", show: "Drama Series" },
-                  { time: "4:00 PM", show: "Aap Ki Sehat (Health Program)" },
-                  { time: "6:00 PM", show: "Documentary & Social Issues" },
-                  { time: "8:00 PM", show: "Puray Dil Se (Worship)" },
-                  { time: "10:00 PM", show: "Debate & Apologetics" },
-                ].map((item) => (
-                  <div key={item.time} className="flex items-center gap-4 px-6 py-3 hover:bg-white/[0.02] transition-colors">
-                    <span className="text-sm font-mono text-btl-red w-20 shrink-0">{item.time}</span>
-                    <span className="text-sm text-foreground">{item.show}</span>
-                  </div>
-                ))}
+          {schedule && (
+            <Card className="bg-btl-card border-btl-card-border overflow-hidden">
+              <div className="bg-gradient-to-r from-btl-red/10 to-transparent p-4 md:p-6 border-b border-btl-card-border">
+                <div className="flex items-center gap-3"><Clock className="h-5 w-5 text-btl-red" /><h3 className="text-lg font-bold text-foreground">Schedule</h3></div>
               </div>
-            </CardContent>
-          </Card>
+              <CardContent className="p-4 md:p-6">
+                <p className="text-sm text-muted-foreground whitespace-pre-line">{schedule}</p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

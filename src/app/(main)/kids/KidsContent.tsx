@@ -1,13 +1,27 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Baby, Play, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { KIDS_PROGRAMS, getEpisodeCount } from "@/lib/site-data";
+import { KIDS_PROGRAMS } from "@/lib/site-data";
+import { useRouter } from "next/navigation";
 
 export default function KidsContent() {
+  const router = useRouter();
+  const [epCounts, setEpCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    KIDS_PROGRAMS.forEach((p) => {
+      const pid = p.id;
+      fetch(`/api/youtube/${pid}`, { cache: "no-store" })
+        .then((r) => r.json())
+        .then((data) => setEpCounts((prev) => ({ ...prev, [pid]: data.count || 0 })))
+        .catch(() => null);
+    });
+  }, []);
+
   return (
     <div className="min-h-screen">
       <div className="relative w-full overflow-hidden bg-gradient-to-br from-btl-red/20 via-btl-dark to-btl-dark">
@@ -24,14 +38,14 @@ export default function KidsContent() {
       <div className="px-4 md:px-6 py-8 max-w-5xl mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {KIDS_PROGRAMS.map((program) => (
-            <motion.div key={program.id} whileHover={{ y: -6, scale: 1.02 }} className="cursor-pointer" onClick={() => window.location.href = '/shows/' + program.slug}>
+            <motion.div key={program.id} whileHover={{ y: -6, scale: 1.02 }} className="cursor-pointer" onClick={() => router.push(`/shows/${program.slug}`)}>
               <Card className="bg-btl-card border-btl-card-border hover:border-btl-red/30 transition-all overflow-hidden h-full">
                 <div className="relative aspect-video overflow-hidden">
                   <img src={program.poster} alt={program.title} width={320} height={180} loading="lazy" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                   <Badge className="absolute top-2 left-2 bg-btl-red text-black text-[10px] font-bold px-2 py-0.5">KIDS</Badge>
                   <div className="absolute bottom-2 right-2 bg-black/60 rounded-full px-2 py-0.5 text-[10px] text-white flex items-center gap-1">
-                    <Play className="h-3 w-3 fill-white" /> {getEpisodeCount(program.id)}
+                    <Play className="h-3 w-3 fill-white" /> {epCounts[program.id] ?? "..."}
                   </div>
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20">
                     <div className="h-14 w-14 rounded-full bg-btl-red/90 flex items-center justify-center shadow-lg">
@@ -44,7 +58,7 @@ export default function KidsContent() {
                   <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{program.description}</p>
                   <div className="flex items-center gap-2 mt-3">
                     <Sparkles className="h-3.5 w-3.5 text-btl-red" />
-                    <span className="text-xs text-btl-red font-medium">{getEpisodeCount(program.id)} Episodes</span>
+                    <span className="text-xs text-btl-red font-medium">{epCounts[program.id] ?? "..."} Episodes</span>
                   </div>
                 </CardContent>
               </Card>

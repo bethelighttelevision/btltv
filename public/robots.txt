@@ -5,13 +5,7 @@ Allow: /
 # *
 User-agent: *
 Disallow: /admin
-Disallow: /dashboard
-Disallow: /profile
-Disallow: /auth
 Disallow: /api
-Disallow: /forgot-password
-Disallow: /reset-password
-Disallow: /bible-school/course
 
 # Host
 Host: https://btl-tv.com

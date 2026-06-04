@@ -189,104 +189,151 @@ export default function DonationContent() {
 }
 
 function PiggyBankAnimation() {
+  const [mousePos, setMousePos] = React.useState({ x: 0, y: 0 });
+  const [coinState, setCoinState] = React.useState<"idle" | "dropping" | "thankyou">("idle");
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleMouse = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      setMousePos({ x: e.clientX - cx, y: e.clientY - cy });
+    };
+    window.addEventListener("mousemove", handleMouse);
+    return () => window.removeEventListener("mousemove", handleMouse);
+  }, []);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setCoinState("dropping");
+      setTimeout(() => setCoinState("thankyou"), 4000);
+      setTimeout(() => setCoinState("idle"), 5500);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const maxDist = 40;
+  const eyeX = Math.max(-3, Math.min(3, (mousePos.x / maxDist) * 2.5));
+  const eyeY = Math.max(-3, Math.min(3, (mousePos.y / maxDist) * 2));
+
   return (
-    <div className="relative w-36 h-36 md:w-44 md:h-44 lg:w-52 lg:h-52">
+    <div ref={containerRef} className="relative w-36 h-36 md:w-44 md:h-44 lg:w-52 lg:h-52">
       <style>{`
         @keyframes coinDrop {
-          0% { transform: translateY(-60px) translateX(0) scale(0.5); opacity: 0; }
-          10% { transform: translateY(-60px) translateX(0) scale(1); opacity: 1; }
-          60% { transform: translateY(20px) translateX(15px) scale(1); opacity: 1; }
-          75% { transform: translateY(38px) translateX(10px) scale(0.6); opacity: 0.6; }
+          0% { transform: translateY(-80px) translateX(0) scale(0.3); opacity: 0; }
+          10% { transform: translateY(-80px) translateX(5px) scale(1); opacity: 1; }
+          50% { transform: translateY(10px) translateX(18px) scale(1); opacity: 1; }
+          70% { transform: translateY(35px) translateX(12px) scale(0.7); opacity: 0.8; }
+          85% { transform: translateY(42px) translateX(8px) scale(0.3); opacity: 0; }
           100% { transform: translateY(42px) translateX(8px) scale(0); opacity: 0; }
         }
         @keyframes piggyBounce {
           0%, 100% { transform: translateY(0) rotate(0deg); }
-          15% { transform: translateY(-3px) rotate(-2deg); }
-          30% { transform: translateY(0) rotate(0deg); }
-          45% { transform: translateY(-2px) rotate(1deg); }
-          60% { transform: translateY(0) rotate(0deg); }
-        }
-        @keyframes smileGrow {
-          0%, 60% { d: path("M30,70 Q38,78 46,70"); }
-          70%, 100% { d: path("M28,68 Q38,82 48,68"); }
-        }
-        @keyframes tailWag {
-          0%, 100% { transform: rotate(0deg); }
-          50% { transform: rotate(15deg); }
-        }
-        @keyframes eyeBlink {
-          0%, 95%, 100% { transform: scaleY(1); }
-          97% { transform: scaleY(0.1); }
+          20% { transform: translateY(-3px) rotate(-2deg); }
+          40% { transform: translateY(0) rotate(0deg); }
+          60% { transform: translateY(-2px) rotate(1deg); }
+          80% { transform: translateY(0) rotate(0deg); }
         }
         @keyframes slotGlow {
           0%, 100% { opacity: 0; }
-          50% { opacity: 0.6; }
+          50% { opacity: 0.9; }
+        }
+        @keyframes ripple1 {
+          0% { r: 10; opacity: 0.6; stroke-width: 3; }
+          100% { r: 48; opacity: 0; stroke-width: 0.5; }
+        }
+        @keyframes ripple2 {
+          0% { r: 10; opacity: 0.45; stroke-width: 3; }
+          100% { r: 48; opacity: 0; stroke-width: 0.5; }
+        }
+        @keyframes ripple3 {
+          0% { r: 10; opacity: 0.3; stroke-width: 3; }
+          100% { r: 48; opacity: 0; stroke-width: 0.5; }
         }
         .coin-anim {
-          animation: coinDrop 3s ease-in-out infinite;
+          animation: coinDrop 4.5s ease-in-out infinite;
         }
         .piggy-anim {
           animation: piggyBounce 3s ease-in-out infinite;
         }
-        .tail-anim {
-          animation: tailWag 1.5s ease-in-out infinite;
-          transform-origin: 52px 38px;
-        }
-        .eye-left { animation: eyeBlink 4s ease-in-out infinite; }
-        .eye-right { animation: eyeBlink 4s ease-in-out infinite 0.3s; }
-        .smile-path {
-          animation: smileGrow 3s ease-in-out infinite;
-        }
         .slot-glow {
-          animation: slotGlow 3s ease-in-out infinite;
+          animation: slotGlow 4.5s ease-in-out infinite;
         }
+        .ripple-ring-1 { animation: ripple1 1.8s ease-out infinite; }
+        .ripple-ring-2 { animation: ripple2 1.8s ease-out infinite 0.3s; }
+        .ripple-ring-3 { animation: ripple3 1.8s ease-out infinite 0.6s; }
       `}</style>
-      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_15px_rgba(255,85,0,0.2)]">
+      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_20px_rgba(255,85,0,0.25)]">
         {/* Coin */}
-        <g className="coin-anim">
-          <circle cx="50" cy="0" r="5" fill="#FFD700" />
-          <circle cx="50" cy="0" r="4" fill="#FFC107" />
-          <text x="50" y="2" textAnchor="middle" fontSize="5" fill="#B8860B" fontWeight="bold">€</text>
+        <g className="coin-anim" style={coinState === "thankyou" ? { display: "none" } : {}}>
+          <circle cx="50" cy="0" r="8" fill="#FFD700" stroke="#DAA520" strokeWidth="1" />
+          <circle cx="50" cy="0" r="6.5" fill="url(#coinGrad)" />
+          <text x="50" y="3" textAnchor="middle" fontSize="8" fill="#B8860B" fontWeight="bold">€</text>
         </g>
+        {/* Light Ripple */}
+        {coinState !== "idle" && (
+          <g>
+            <circle cx="48" cy="50" r="10" fill="none" stroke="url(#rippleGrad)" className="ripple-ring-1" />
+            <circle cx="48" cy="50" r="10" fill="none" stroke="url(#rippleGrad)" className="ripple-ring-2" />
+            <circle cx="48" cy="50" r="10" fill="none" stroke="url(#rippleGrad)" className="ripple-ring-3" />
+          </g>
+        )}
         {/* Piggy Body */}
         <g className="piggy-anim">
           {/* Shadow */}
-          <ellipse cx="50" cy="88" rx="28" ry="4" fill="rgba(0,0,0,0.15)" />
-          {/* Tail */}
-          <path d="M72,42 Q80,35 82,28 Q83,24 80,25 Q77,26 79,30" fill="none" stroke="#F48FB1" strokeWidth="3" strokeLinecap="round" className="tail-anim" />
-          {/* Back legs */}
-          <rect x="60" y="72" width="8" height="12" rx="4" fill="#F06292" />
-          <rect x="32" y="72" width="8" height="12" rx="4" fill="#F06292" />
+          <ellipse cx="50" cy="90" rx="28" ry="4" fill="rgba(0,0,0,0.1)" />
           {/* Body */}
-          <ellipse cx="48" cy="50" rx="32" ry="28" fill="#F48FB1" />
-          <ellipse cx="48" cy="48" rx="30" ry="26" fill="#F8BBD0" />
-          {/* Highlight */}
-          <ellipse cx="38" cy="36" rx="14" ry="10" fill="rgba(255,255,255,0.2)" transform="rotate(-15,38,36)" />
+          <ellipse cx="48" cy="50" rx="34" ry="29" fill="#F06292" />
+          <ellipse cx="48" cy="48" rx="32" ry="27" fill="url(#bodyGrad)" />
+          {/* Belly patch */}
+          <ellipse cx="48" cy="58" rx="20" ry="14" fill="rgba(255,255,255,0.15)" />
+          {/* Shine highlight */}
+          <ellipse cx="36" cy="34" rx="12" ry="8" fill="rgba(255,255,255,0.25)" transform="rotate(-20,36,34)" />
           {/* Ears */}
-          <ellipse cx="68" cy="28" rx="6" ry="8" fill="#F48FB1" transform="rotate(20,68,28)" />
-          <ellipse cx="68" cy="28" rx="4" ry="6" fill="#F8BBD0" transform="rotate(20,68,28)" />
-          <ellipse cx="34" cy="26" rx="6" ry="8" fill="#F48FB1" transform="rotate(-15,34,26)" />
-          <ellipse cx="34" cy="26" rx="4" ry="6" fill="#F8BBD0" transform="rotate(-15,34,26)" />
+          <ellipse cx="70" cy="28" rx="7" ry="9" fill="#E91E63" transform="rotate(25,70,28)" />
+          <ellipse cx="70" cy="28" rx="4.5" ry="6.5" fill="rgba(255,255,255,0.2)" transform="rotate(25,70,28)" />
+          <ellipse cx="32" cy="26" rx="7" ry="9" fill="#E91E63" transform="rotate(-20,32,26)" />
+          <ellipse cx="32" cy="26" rx="4.5" ry="6.5" fill="rgba(255,255,255,0.2)" transform="rotate(-20,32,26)" />
           {/* Coin Slot */}
-          <rect x="42" y="22" width="10" height="3" rx="1" fill="#D81B60" />
-          <rect x="43" y="22.5" width="8" height="2" rx="1" fill="#FBBF24" className="slot-glow" />
+          <rect x="41" y="21" width="12" height="3.5" rx="1.5" fill="#AD1457" />
+          <rect x="42" y="21.5" width="10" height="2.5" rx="1.5" fill="#FBBF24" className="slot-glow" />
           {/* Eyes */}
-          <circle cx="38" cy="42" r="4" fill="#333" className="eye-left" />
-          <circle cx="60" cy="42" r="4" fill="#333" className="eye-right" />
-          <circle cx="39" cy="40" r="1.5" fill="white" />
-          <circle cx="61" cy="40" r="1.5" fill="white" />
+          <g>
+            <circle cx="37" cy="43" r="6" fill="white" />
+            <circle cx="37" cy="43" r="5.5" fill="#F5F5F5" />
+            <circle cx="37" cy="43" r="3" fill="#1A1A1A" transform={`translate(${eyeX},${eyeY})`} />
+            <circle cx="36" cy="41" r="1.2" fill="white" opacity="0.9" transform={`translate(${eyeX},${eyeY})`} />
+          </g>
+          <g>
+            <circle cx="61" cy="43" r="6" fill="white" />
+            <circle cx="61" cy="43" r="5.5" fill="#F5F5F5" />
+            <circle cx="61" cy="43" r="3" fill="#1A1A1A" transform={`translate(${eyeX},${eyeY})`} />
+            <circle cx="60" cy="41" r="1.2" fill="white" opacity="0.9" transform={`translate(${eyeX},${eyeY})`} />
+          </g>
           {/* Snout */}
-          <ellipse cx="48" cy="60" rx="12" ry="8" fill="#F06292" />
-          <ellipse cx="48" cy="60" rx="10" ry="6" fill="#F48FB1" />
+          <ellipse cx="48" cy="61" rx="14" ry="9" fill="#E91E63" />
+          <ellipse cx="48" cy="61" rx="12" ry="7.5" fill="#F06292" />
           {/* Nostrils */}
-          <circle cx="43" cy="59" r="2" fill="#D81B60" />
-          <circle cx="53" cy="59" r="2" fill="#D81B60" />
-          {/* Smile */}
-          <path d="M30,70 Q38,78 46,70" fill="none" stroke="#D81B60" strokeWidth="2" strokeLinecap="round" className="smile-path" />
-          {/* Cheek blush */}
-          <ellipse cx="28" cy="56" rx="4" ry="3" fill="rgba(255,100,100,0.2)" />
-          <ellipse cx="68" cy="56" rx="4" ry="3" fill="rgba(255,100,100,0.2)" />
+          <ellipse cx="42" cy="60" rx="2.5" ry="2" fill="#AD1457" />
+          <ellipse cx="54" cy="60" rx="2.5" ry="2" fill="#AD1457" />
         </g>
+        {/* Gradients */}
+        <defs>
+          <radialGradient id="bodyGrad" cx="40%" cy="35%" r="60%">
+            <stop offset="0%" stopColor="#F8BBD0" />
+            <stop offset="100%" stopColor="#F06292" />
+          </radialGradient>
+          <radialGradient id="coinGrad" cx="40%" cy="30%" r="60%">
+            <stop offset="0%" stopColor="#FFF176" />
+            <stop offset="100%" stopColor="#FFC107" />
+          </radialGradient>
+          <linearGradient id="rippleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FFD700" />
+            <stop offset="100%" stopColor="#FF6B35" />
+          </linearGradient>
+        </defs>
       </svg>
     </div>
   );

@@ -1,12 +1,14 @@
 import AboutContent from "./AboutContent";
-import { pageMetadata } from "@/lib/seo-metadata";
+import { getPageContent } from "@/lib/public-data";
 
-export const metadata = pageMetadata(
-  "About Us",
-  "BTL TV is a Christian faith-based media platform broadcasting in Urdu. Learn about our mission to spread the Gospel to Pakistani-speaking communities worldwide.",
-  "/about",
-  "/images/about/about-banner.webp"
-);
+export async function generateMetadata() {
+  const content = await getPageContent("about");
+  return {
+    title: content.pageTitle || "About Us - BTL TV",
+    description: content.metaDescription || "BTL TV is a Christian faith-based media platform broadcasting in Urdu. Learn about our mission to spread the Gospel to Pakistani-speaking communities worldwide.",
+    openGraph: content.ogImage ? { images: [content.ogImage] } : undefined,
+  };
+}
 
 export default function AboutPage() {
   return <AboutContent />;

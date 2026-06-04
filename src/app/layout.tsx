@@ -88,13 +88,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className="dark">
+    <html lang="ur" suppressHydrationWarning className="dark">
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
-        <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -104,7 +99,9 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#0a0a0f" />
         <meta name="msapplication-tap-highlight" content="no" />
         <link rel="indexnow" href="https://btl-tv.com/34ca8fee16d64bc4bb0eb2477b72a4ef.txt" />
-        <meta name="msvalidate.01" content={process.env.BING_VERIFICATION_CODE ?? "your-bing-verification-code-here"} />
+        {process.env.BING_VERIFICATION_CODE && (
+          <meta name="msvalidate.01" content={process.env.BING_VERIFICATION_CODE} />
+        )}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -162,7 +159,7 @@ export default function RootLayout({
                 { "@type": "SiteNavigationElement", name: "Home", url: "https://btl-tv.com" },
                 { "@type": "SiteNavigationElement", name: "Shows", url: "https://btl-tv.com/shows" },
                 { "@type": "SiteNavigationElement", name: "Live TV", url: "https://btl-tv.com/live" },
-                { "@type": "SiteNavigationElement", name: "Bible School", url: "https://btl-tv.com/bible-school" },
+
                 { "@type": "SiteNavigationElement", name: "About", url: "https://btl-tv.com/about" },
                 { "@type": "SiteNavigationElement", name: "Stichting", url: "https://btl-tv.com/stichting" },
                 { "@type": "SiteNavigationElement", name: "Team", url: "https://btl-tv.com/team" },

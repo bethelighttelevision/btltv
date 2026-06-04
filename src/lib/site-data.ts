@@ -1,11 +1,9 @@
 "use client";
 
-import episodesData from "@/lib/episodes-data.json";
 import {
   Tv,
   Play,
   Flame,
-  BookMarked,
   BookOpen,
   Building2,
   Users,
@@ -27,15 +25,6 @@ import {
 import type { ElementType } from "react";
 
 // ─── Types ───────────────────────────────────────────────────────────
-export interface Episode {
-  videoId: string;
-  title: string;
-  thumbnail: string;
-  duration: string;
-  channel: string;
-  position: number;
-}
-
 export interface Program {
   id: string;
   title: string;
@@ -71,7 +60,6 @@ export const DESKTOP_NAV: NavItem[] = [
   { key: "home", label: "Home", href: "/" },
   { key: "shows", label: "Shows", href: "/shows" },
   { key: "live", label: "Live TV", href: "/live" },
-  { key: "bible-school", label: "Bible School", href: "/bible-school" },
   { key: "about", label: "About", href: "/about" },
 ];
 
@@ -89,7 +77,6 @@ export const NAV_LINKS = [
   { key: "home", label: "Home", icon: Tv },
   { key: "shows", label: "Shows", icon: Play },
   { key: "live", label: "Live TV", icon: Flame },
-  { key: "bible-school", label: "Bible School", icon: BookMarked },
   { key: "about", label: "About", icon: BookOpen },
   { key: "stichting", label: "Stichting", icon: Building2 },
   { key: "team", label: "Team", icon: Users },
@@ -557,34 +544,6 @@ export const OTHER_REPORTS = [
   { title: "VNA Newsletter", year: "2018", file: "/reports/Reports BTL Tv/VNA-Nieuwsbrief.pdf" },
   { title: "Nieuwsbode Weekly", year: "2020", file: "/reports/Reports BTL Tv/Nieuwsbode_wk52_NB12.pdf" },
 ];
-
-// ─── Helpers ─────────────────────────────────────────────────────────
-export function getEpisodes(playlistId: string): Episode[] {
-  return (episodesData.episodes as Record<string, Episode[]>)[playlistId] || [];
-}
-
-export function getEpisodeCount(playlistId: string): number {
-  return getEpisodes(playlistId).length;
-}
-
-export const ALL_SHOWS: Program[] = [...PROGRAMS, ...KIDS_PROGRAMS];
-
-export function getProgramBySlug(slug: string): Program | undefined {
-  return ALL_SHOWS.find((p) => p.slug === slug);
-}
-
-export function getProgramById(id: string): Program | undefined {
-  return ALL_SHOWS.find((p) => p.id === id);
-}
-
-export function decodeHtmlEntities(text: string): string {
-  return text
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
-}
 
 // ─── Urdu Audio Bible Player ─────────────────────────────────────────
 export const BIBLE_BOOKS = [

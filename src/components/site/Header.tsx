@@ -37,7 +37,6 @@ export default function Header() {
 
   const getHref = (key: string) => {
     if (key === "home") return "/";
-    if (key === "bible-school") return "/bible-school";
     return `/${key}`;
   };
 

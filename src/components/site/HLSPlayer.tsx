@@ -4,19 +4,19 @@ import React, { useState, useEffect, useRef } from "react";
 import { Tv, Youtube } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-function HLSPlayer() {
+function HLSPlayer({ src }: { src?: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
   const hlsRef = useRef<import("hls.js").default | null>(null);
+  const streamUrl = src || "https://livecdn.live247stream.com/btl/tv/playlist.m3u8";
 
   useEffect(() => {
     let hls: import("hls.js").default | null = null;
     const initPlayer = async () => {
       if (!videoRef.current) return;
       const Hls = (await import("hls.js")).default;
-      const src = "https://livecdn.live247stream.com/btl/tv/playlist.m3u8";
       if (Hls.isSupported()) {
         hls = new Hls({
           enableWorker: true,
@@ -26,7 +26,7 @@ function HLSPlayer() {
           startLevel: -1,
         });
         hlsRef.current = hls;
-        hls.loadSource(src);
+        hls.loadSource(streamUrl);
         hls.attachMedia(videoRef.current);
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           setLoading(false);
@@ -53,7 +53,7 @@ function HLSPlayer() {
           }
         });
       } else if (videoRef.current.canPlayType("application/vnd.apple.mpegurl")) {
-        videoRef.current.src = src;
+        videoRef.current.src = streamUrl;
         videoRef.current.addEventListener("loadeddata", () => setLoading(false));
         videoRef.current.addEventListener("error", () => setError(true));
         videoRef.current.play().catch(() => { });
@@ -65,7 +65,7 @@ function HLSPlayer() {
     return () => {
       if (hls) hls.destroy();
     };
-  }, [retryCount]);
+  }, [retryCount, streamUrl]);
 
   const handleRetry = () => {
     setError(false);

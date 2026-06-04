@@ -5,10 +5,10 @@
   "start_url": "https://btl-tv.com/?source=pwa",
   "display": "standalone",
   "background_color": "#0a0a0f",
-  "theme_color": "#E50914",
+  "theme_color": "#0a0a0f",
   "orientation": "any",
   "scope": "https://btl-tv.com/",
-  "lang": "en",
+  "lang": "ur",
   "categories": ["entertainment", "streaming", "lifestyle", "education"],
   "prefer_related_applications": false,
   "icons": [
