@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BookOpen, GraduationCap, Users, HelpCircle, Loader2, Database, ArrowUpRight, TrendingUp, Layers } from "lucide-react";
+import { BookOpen, GraduationCap, Users, HelpCircle, Loader2, Database, ArrowUpRight, TrendingUp, Layers, Smartphone, Globe, Download } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -14,17 +14,30 @@ interface Stats {
   enrollments: number;
 }
 
+interface DownloadStats {
+  total: number;
+  today: number;
+  yesterday: number;
+  byCountry: { country: string; _count: number }[];
+  byPlatform: { platform: string; _count: number }[];
+  recent: { id: string; country: string; city: string; platform: string; createdAt: string }[];
+}
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [seeding, setSeeding] = useState(false);
+  const [downloadStats, setDownloadStats] = useState<DownloadStats | null>(null);
 
   const loadStats = () => {
     setLoading(true);
-    fetch("/api/stats")
-      .then((r) => r.json())
-      .then(setStats)
-      .finally(() => setLoading(false));
+    Promise.all([
+      fetch("/api/stats").then((r) => r.json()),
+      fetch("/api/stats/downloads").then((r) => r.json()).catch(() => null),
+    ]).then(([s, d]) => {
+      setStats(s);
+      setDownloadStats(d);
+    }).finally(() => setLoading(false));
   };
 
   useEffect(() => { loadStats(); }, []);
@@ -141,6 +154,89 @@ export default function AdminDashboard() {
           {stats?.enrollments ?? 0} enrollments across {stats?.courses ?? 0} courses
         </p>
       </div>
+
+      {/* App Download Stats */}
+      {downloadStats && (
+        <div className="bg-[#111] border border-white/[0.06] rounded-2xl p-6">
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+            <Smartphone className="h-5 w-5 text-btl-red" /> App Downloads
+          </h2>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            <div className="bg-white/[0.03] rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold text-white">{downloadStats.total}</div>
+              <div className="text-xs text-gray-400 mt-1">Total Downloads</div>
+            </div>
+            <div className="bg-white/[0.03] rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold text-btl-red">{downloadStats.today}</div>
+              <div className="text-xs text-gray-400 mt-1">Today</div>
+            </div>
+            <div className="bg-white/[0.03] rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold text-white">{downloadStats.yesterday}</div>
+              <div className="text-xs text-gray-400 mt-1">Yesterday</div>
+            </div>
+            <div className="bg-white/[0.03] rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold text-white flex items-center justify-center gap-1">
+                <Globe className="h-4 w-4 text-btl-red" />
+                {downloadStats.byCountry.length}
+              </div>
+              <div className="text-xs text-gray-400 mt-1">Countries</div>
+            </div>
+          </div>
+
+          {downloadStats.byCountry.length > 0 && (
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
+                <Globe className="h-4 w-4 text-btl-red" /> By Country
+              </h3>
+              <div className="space-y-1.5">
+                {downloadStats.byCountry.map((c) => (
+                  <div key={c.country} className="flex items-center gap-3">
+                    <span className="text-sm text-gray-400 w-32 truncate">{c.country || "Unknown"}</span>
+                    <div className="flex-1 bg-white/[0.06] rounded-full h-2 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-btl-red"
+                        style={{ width: `${(c._count / Math.max(...downloadStats.byCountry.map((x) => x._count))) * 100}%` }}
+                      />
+                    </div>
+                    <span className="text-sm text-white font-semibold w-8 text-right">{c._count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {downloadStats.recent.length > 0 && (
+            <div>
+              <h3 className="text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
+                <Download className="h-4 w-4 text-btl-red" /> Recent Downloads
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-gray-500 border-b border-white/[0.06]">
+                      <th className="text-left py-2 pr-4">Date</th>
+                      <th className="text-left py-2 pr-4">Country</th>
+                      <th className="text-left py-2 pr-4">City</th>
+                      <th className="text-left py-2">Platform</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {downloadStats.recent.map((d) => (
+                      <tr key={d.id} className="border-b border-white/[0.03]">
+                        <td className="py-1.5 pr-4 text-gray-400">{new Date(d.createdAt).toLocaleString()}</td>
+                        <td className="py-1.5 pr-4 text-gray-300">{d.country || "-"}</td>
+                        <td className="py-1.5 pr-4 text-gray-300">{d.city || "-"}</td>
+                        <td className="py-1.5 text-gray-300 capitalize">{d.platform}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
