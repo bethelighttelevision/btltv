@@ -30,6 +30,7 @@ import SoundCloudSection from "@/components/site/SoundCloudSection";
 import UrduBiblePlayer from "@/components/site/UrduBiblePlayer";
 import ProgramCard from "@/components/site/ProgramCard";
 import PhoneMockup from "@/components/site/PhoneMockup";
+import ReviewsSection from "@/components/site/ReviewsSection";
 
 function HomePage() {
   const router = useRouter();
@@ -347,6 +348,9 @@ function HomePage() {
           </motion.div>
         </div>
       </section>
+
+      {/* Reviews Section */}
+      <ReviewsSection />
 
       {/* SoundCloud Section */}
       <SoundCloudSection />

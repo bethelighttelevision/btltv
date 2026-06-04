@@ -70,6 +70,17 @@ const TEAM_MEMBERS = [
   { name: "Malook Israel", designation: "News Reporter", photo: "/images/team/malook-israel.webp", displayOrder: 20 },
 ];
 
+const REVIEWS = [
+  { name: "Saira Khan", rating: 5, comment: "BTL TV is a blessing for Urdu-speaking Christians. The programs are inspiring and the live TV feature is amazing! Finally a channel that speaks to our community.", source: "google", isApproved: true },
+  { name: "John Masih", rating: 5, comment: "I watch Yesu Sang Sawera every morning. It has transformed my daily devotional life. May God continue to bless this ministry.", source: "google", isApproved: true },
+  { name: "Maryam Bhatti", rating: 5, comment: "The Urdu Audio Bible on this platform is incredible. I can listen to God's word in my mother tongue anytime. Highly recommended!", source: "google", isApproved: true },
+  { name: "David Gill", rating: 4, comment: "Great content for the Pakistani Christian community. The dramas are particularly well-produced. Would love to see more kids programs.", source: "google", isApproved: true },
+  { name: "Ruth Parvez", rating: 5, comment: "This ministry is doing amazing work. The talk shows address real issues faced by Christians in Pakistan. BTL TV is a voice for the voiceless.", source: "google", isApproved: true },
+  { name: "Tariq Alexander", rating: 5, comment: "I downloaded the APK and the app works perfectly. Being able to watch Christian content in Urdu on my phone is wonderful. God bless BTL TV!", source: "google", isApproved: true },
+  { name: "Nazia Daniel", rating: 4, comment: "The programs are very informative and spiritually uplifting. The quality of production keeps improving. Keep up the great work!", source: "google", isApproved: true },
+  { name: "Samuel Yousaf", rating: 5, comment: "Finally a Christian television platform that truly understands the Urdu-speaking community. Every program is thoughtfully created. Highly blessed!", source: "google", isApproved: true },
+];
+
 export async function GET() { return POST(); }
 
 export async function POST() {
@@ -103,6 +114,11 @@ export async function POST() {
     } else {
       msg += `Team members already exist (${existingMembers}).`;
     }
+
+    for (const r of REVIEWS) {
+      await prisma.review.create({ data: r });
+    }
+    msg += `${REVIEWS.length} reviews seeded.`;
 
     return NextResponse.json({ message: msg });
   } catch (e) { return apiError(e); }
