@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Mail, Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,13 +33,12 @@ export default function LoginPage() {
       setError("Invalid email or password. Please try again.");
       setLoading(false);
     } else {
-      router.push("/dashboard");
+      router.push(callbackUrl);
     }
   };
 
   return (
     <main className="min-h-screen bg-black text-white flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img
           src="https://images.unsplash.com/photo-1491841550275-ad7854e35ca6?q=80&w=1974&auto=format&fit=crop"
@@ -122,7 +123,7 @@ export default function LoginPage() {
           <div className="space-y-3">
             <Button
               type="button"
-              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+              onClick={() => signIn("google", { callbackUrl })}
               variant="outline"
               disabled={loading}
               className="w-full h-12 bg-white text-black hover:bg-gray-100 font-urdu text-lg flex items-center justify-center gap-3 rounded-lg"
@@ -134,9 +135,17 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-8 text-center text-sm text-gray-400 font-urdu">
-          اکاؤنٹ نہیں ہے؟ <Link href="/auth/signup" className="text-btl-red hover:underline">رجسٹر کریں</Link>
+          اکاؤنٹ نہیں ہے؟ <Link href={"/auth/signup?callbackUrl=" + encodeURIComponent(callbackUrl)} className="text-btl-red hover:underline">رجسٹر کریں</Link>
         </div>
       </motion.div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

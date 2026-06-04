@@ -102,6 +102,13 @@ model AppDownload {
   createdAt DateTime @default(now())
 }
 
+model AdminSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
 model Post {
   id        String   @id @default(cuid())
   title     String

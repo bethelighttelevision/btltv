@@ -25,7 +25,7 @@ export default function AdminCourses() {
 
   const load = () => {
     setLoading(true);
-    fetch("/api/courses").then((r) => r.json()).then(setCourses).finally(() => setLoading(false));
+    fetch("/api/courses").then((r) => r.json()).then((data) => setCourses(Array.isArray(data) ? data : [])).finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);

@@ -41,8 +41,11 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, account, user }) {
-      if (account) {
+      if (account && user) {
         token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+        token.picture = (user as any).image || null;
         token.role = (user as any).role || "user";
       }
       if (token.email === "bethelighttelevision@gmail.com") {

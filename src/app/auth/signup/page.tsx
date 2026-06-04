@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Mail, Lock, User, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function SignupPage() {
+function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,7 +44,7 @@ export default function SignupPage() {
         redirect: false,
       });
 
-      router.push("/dashboard");
+      router.push(callbackUrl);
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);
@@ -51,7 +53,6 @@ export default function SignupPage() {
 
   return (
     <main className="min-h-screen bg-black text-white flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img
           src="https://images.unsplash.com/photo-1491841550275-ad7854e35ca6?q=80&w=1974&auto=format&fit=crop"
@@ -143,7 +144,7 @@ export default function SignupPage() {
           <div className="space-y-3">
             <Button
               type="button"
-              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+              onClick={() => signIn("google", { callbackUrl })}
               variant="outline"
               disabled={loading}
               className="w-full h-12 bg-white text-black hover:bg-gray-100 font-urdu text-lg flex items-center justify-center gap-3 rounded-lg"
@@ -155,9 +156,17 @@ export default function SignupPage() {
         </div>
 
         <div className="mt-8 text-center text-sm text-gray-400 font-urdu">
-          پہلے سے اکاؤنٹ ہے؟ <Link href="/auth/login" className="text-btl-red hover:underline">لاگ ان کریں</Link>
+          پہلے سے اکاؤنٹ ہے؟ <Link href={"/auth/login?callbackUrl=" + encodeURIComponent(callbackUrl)} className="text-btl-red hover:underline">لاگ ان کریں</Link>
         </div>
       </motion.div>
     </main>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense>
+      <SignupForm />
+    </Suspense>
   );
 }

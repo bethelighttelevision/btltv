@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { User, Mail, Lock, Save, ArrowLeft, Loader2, CheckCircle, XCircle } from "lucide-react";
+import { User, Mail, Lock, Save, ArrowLeft, Loader2, CheckCircle, XCircle, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -26,6 +26,7 @@ function ProfileContent() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -39,6 +40,26 @@ function ProfileContent() {
       })
       .catch(() => setLoading(false));
   }, []);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarUploading(true);
+    const formData = new FormData();
+    formData.append("avatar", file);
+    const res = await fetch("/api/profile/avatar", {
+      method: "POST",
+      body: formData,
+    });
+    if (!res.ok) {
+      toast.error("Failed to upload avatar");
+      setAvatarUploading(false);
+      return;
+    }
+    toast.success("Avatar updated!");
+    await update();
+    setAvatarUploading(false);
+  };
 
   const saveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,6 +117,32 @@ function ProfileContent() {
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-2xl md:text-3xl font-bold mb-8">Profile Settings</h1>
+
+          {/* Avatar */}
+          <div className="bg-btl-card border border-btl-card-border rounded-xl p-6 mb-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Camera className="h-5 w-5 text-btl-red" /> Profile Picture</h2>
+            <div className="flex items-center gap-6">
+              <div className="relative group">
+                <div className="h-20 w-20 rounded-full bg-btl-red/20 border-2 border-btl-red/30 flex items-center justify-center text-2xl text-btl-red font-bold uppercase overflow-hidden">
+                  {session?.user?.image ? (
+                    <img src={session.user.image} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    (session?.user?.name || "S")[0]
+                  )}
+                </div>
+                <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                  <Camera className="h-5 w-5 text-white" />
+                  <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={avatarUploading} />
+                </label>
+                {avatarUploading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-full">
+                    <Loader2 className="h-5 w-5 animate-spin text-white" />
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-gray-500">Click the image to upload a new avatar</p>
+            </div>
+          </div>
 
           {/* Profile Info */}
           <div className="bg-btl-card border border-btl-card-border rounded-xl p-6 mb-6">

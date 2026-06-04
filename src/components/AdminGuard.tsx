@@ -1,21 +1,19 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import { Loader2 } from "lucide-react";
 
 export default function AdminGuard({ children }: { children: ReactNode }) {
   const { data: session, status } = useSession();
-  const router = useRouter();
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/auth/login");
+      window.location.href = "/auth/login";
     } else if (status === "authenticated" && (session.user as any).role !== "admin") {
-      router.push("/bible-school");
+      window.location.href = "/bible-school";
     }
-  }, [status, session, router]);
+  }, [status, session]);
 
   if (status === "loading") {
     return (
