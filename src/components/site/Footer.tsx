@@ -26,7 +26,7 @@ export default function Footer() {
               <button className="text-muted-foreground hover:text-[#ff5500]" onClick={() => window.open("https://soundcloud.com/user-549013936", "_blank")}>
                 <Disc3 className="h-4 w-4" />
               </button>
-              <button className="text-muted-foreground hover:text-btl-red" onClick={() => window.open("https://www.facebook.com/btltv", "_blank")}>
+              <button className="text-muted-foreground hover:text-btl-red" onClick={() => window.open("https://www.facebook.com/btltvofficial/", "_blank")}>
                 <Facebook className="h-4 w-4" />
               </button>
               <button className="text-muted-foreground hover:text-btl-red" onClick={() => window.open("https://www.instagram.com/btltv", "_blank")}>
@@ -94,7 +94,7 @@ export default function Footer() {
               <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-[#ff5500]" onClick={() => window.open("https://soundcloud.com/user-549013936", "_blank")}>
                 <Disc3 className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-btl-red" onClick={() => window.open("https://www.facebook.com/btltv", "_blank")}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-btl-red" onClick={() => window.open("https://www.facebook.com/btltvofficial/", "_blank")}>
                 <Facebook className="h-4 w-4" />
               </Button>
               <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-btl-red" onClick={() => window.open("https://www.instagram.com/btltv", "_blank")}>

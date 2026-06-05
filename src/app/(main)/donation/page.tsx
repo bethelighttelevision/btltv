@@ -41,7 +41,7 @@ export const metadata: Metadata = {
       ],
       sameAs: [
         "https://www.youtube.com/@btltv",
-        "https://www.facebook.com/btltv",
+        "https://www.facebook.com/btltvofficial/",
         "https://www.instagram.com/btltv",
         "https://soundcloud.com/user-549013936",
       ],

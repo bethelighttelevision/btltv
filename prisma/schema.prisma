@@ -96,6 +96,69 @@ model Review {
   updatedAt      DateTime @updatedAt
 }
 
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  slug        String   @unique
+  thumbnail   String?
+  level       String   @default("intro") // "intro" | "advanced"
+  creditText  String?
+  isPublished Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lessons     Lesson[]
+  enrollments Enrollment[]
+}
+
+model Lesson {
+  id          String        @id @default(cuid())
+  courseId     String
+  course      Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  youtubeId   String?
+  pdfUrl      String?
+  content     String?       // original lesson text
+  order       Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  questions   QuizQuestion[]
+}
+
+model QuizQuestion {
+  id            String @id @default(cuid())
+  lessonId      String
+  lesson        Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  question      String
+  options       String // JSON array ["opt1","opt2","opt3","opt4"]
+  correctAnswer Int    // index into options (0-based)
+  order         Int    @default(0)
+}
+
+model Enrollment {
+  id              String           @id @default(cuid())
+  courseId        String
+  course          Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  studentName     String
+  email           String?
+  progress        Float            @default(0) // 0-100
+  passedLessonIds String           @default("") // comma-separated lesson IDs
+  currentLessonId String?
+  completedAt     DateTime?
+  createdAt       DateTime         @default(now())
+  certificate     Certificate?
+}
+
+model Certificate {
+  id            String     @id @default(cuid())
+  enrollmentId  String     @unique
+  enrollment    Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  certId        String     @unique
+  issuedAt      DateTime   @default(now())
+}
+
 model AppDownload {
   id        String   @id @default(cuid())
   platform  String   @default("android")
@@ -106,4 +169,22 @@ model AppDownload {
   userAgent String?
   referrer  String?
   createdAt DateTime @default(now())
+}
+
+model VideoSEO {
+  id             String    @id @default(cuid())
+  videoId        String    @unique
+  title          String?
+  oldTitle       String?
+  description    String?
+  oldDescription String?
+  tags           String?
+  oldTags        String?
+  status         String    @default("pending") // pending | generated | applied | error
+  category       String?   // devotional | news | drama | talk | bible | other
+  errorMessage   String?
+  generatedAt    DateTime?
+  appliedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }

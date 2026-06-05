@@ -10,6 +10,7 @@ export default function GeneralSettingsPage() {
   const [form, setForm] = useState({
     siteName: "", siteTagline: "",
     contactEmail: "", facebook: "", youtube: "", instagram: "", twitter: "",
+    googleReviewUrl: "",
   });
 
   useEffect(() => {
@@ -47,6 +48,16 @@ export default function GeneralSettingsPage() {
           <label className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Contact Email</label>
           <input value={form.contactEmail} onChange={(e) => setForm({ ...form, contactEmail: e.target.value })}
             className="w-full bg-black/50 border border-white/[0.08] text-white text-sm rounded-lg px-3 h-10 mt-1 focus:outline-none focus:border-btl-red/50" />
+        </div>
+        <div className="pt-2 border-t border-white/[0.04]">
+          <h3 className="text-xs text-gray-400 font-semibold mb-3">Google Reviews</h3>
+          <div>
+            <label className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Google Review URL</label>
+            <input value={form.googleReviewUrl} onChange={(e) => setForm({ ...form, googleReviewUrl: e.target.value })}
+              placeholder="https://g.page/r/CS8tSbX-fni-EBM/review"
+              className="w-full bg-black/50 border border-white/[0.08] text-white text-sm rounded-lg px-3 h-10 mt-1 focus:outline-none focus:border-btl-red/50" />
+            <p className="text-[10px] text-gray-600 mt-1">Paste your full Google review link here to enable the &ldquo;Review on Google&rdquo; button. Leave empty to hide.</p>
+          </div>
         </div>
         <div className="pt-2 border-t border-white/[0.04]">
           <h3 className="text-xs text-gray-400 font-semibold mb-3">Social Media Links</h3>

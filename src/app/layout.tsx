@@ -114,7 +114,7 @@ export default function RootLayout({
               logo: "https://btl-tv.com/images/logo/btl-logo.webp",
               sameAs: [
                 "https://www.youtube.com/@btltv",
-                "https://www.facebook.com/btltv",
+                "https://www.facebook.com/btltvofficial/",
                 "https://www.instagram.com/btltv",
                 "https://soundcloud.com/user-549013936",
               ],

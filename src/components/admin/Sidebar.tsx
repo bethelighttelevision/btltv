@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard, Tv, Users, Video, Radio, BookOpen,
-  Settings, LogOut, ChevronDown, Download, MessageSquare,
+  LayoutDashboard, Tv, Users,   Video, Radio, BookOpen,
+  Settings, LogOut, ChevronDown, Download, MessageSquare, GraduationCap, Search,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
@@ -18,16 +18,24 @@ const navItems = [
       { href: "/admin/shows/new", label: "Add New Show" },
     ],
   },
-  {
+    {
     label: "Videos", icon: Video,
     children: [
       { href: "/admin/videos", label: "All Videos" },
+      { href: "/admin/youtube-seo", label: "YouTube SEO" },
     ],
   },
   { href: "/admin/live-tv", label: "Live TV", icon: Radio },
   { href: "/admin/team", label: "Team", icon: Users },
   { href: "/admin/downloads", label: "Downloads", icon: Download },
   { href: "/admin/reviews", label: "Reviews", icon: MessageSquare },
+  {
+    label: "Bible School", icon: GraduationCap,
+    children: [
+      { href: "/admin/bible-school", label: "Courses" },
+      { href: "/admin/bible-school/enrollments", label: "Enrollments" },
+    ],
+  },
   {
     label: "Pages", icon: BookOpen,
     children: [

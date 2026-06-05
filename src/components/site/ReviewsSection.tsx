@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Star, MessageSquare, Send, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -13,18 +13,35 @@ interface Review {
 
 export default function ReviewsSection() {
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [googleReviewUrl, setGoogleReviewUrl] = useState("");
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", rating: 5, comment: "" });
   const [submitting, setSubmitting] = useState(false);
   const [index, setIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     fetch("/api/reviews")
       .then((r) => r.json())
-      .then((data) => { setReviews(data); setLoading(false); })
+      .then((data) => {
+        setReviews(data.reviews || data || []);
+        if (data.googleReviewUrl) setGoogleReviewUrl(data.googleReviewUrl);
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
   }, []);
+
+  const totalPages = Math.ceil(reviews.length / 3);
+
+  useEffect(() => {
+    if (reviews.length <= 3 || isPaused) return;
+    intervalRef.current = setInterval(() => {
+      setIndex((prev) => (prev + 1) % totalPages);
+    }, 6000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [reviews.length, totalPages, isPaused]);
 
   const submit = async () => {
     if (!form.name.trim() || !form.comment.trim()) { toast.error("Name and comment are required"); return; }
@@ -44,7 +61,11 @@ export default function ReviewsSection() {
   };
 
   const avgRating = reviews.length ? (reviews.reduce((a, r) => a + r.rating, 0) / reviews.length) : 0;
-  const displayReviews = reviews.slice(index, index + 3);
+
+  const pages: Review[][] = [];
+  for (let i = 0; i < reviews.length; i += 3) {
+    pages.push(reviews.slice(i, i + 3));
+  }
 
   if (loading) return null;
 
@@ -59,7 +80,7 @@ export default function ReviewsSection() {
         </div>
 
         {reviews.length > 0 && (
-          <div className="text-center mb-8">
+          <div className="text-center mb-6">
             <div className="flex items-center justify-center gap-1 mb-1">
               {[1, 2, 3, 4, 5].map((s) => (
                 <Star key={s} className={`h-5 w-5 ${s <= Math.round(avgRating) ? "fill-yellow-500 text-yellow-500" : "text-gray-600"}`} />
@@ -69,41 +90,57 @@ export default function ReviewsSection() {
           </div>
         )}
 
-        <div className="relative">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {displayReviews.map((r, i) => (
-              <motion.div
-                key={r.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
-              >
-                <Card className="bg-btl-card/80 border-btl-card-border h-full">
-                  <CardContent className="p-4 md:p-5">
-                    <div className="flex items-center gap-1 mb-2">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star key={s} className={`h-3.5 w-3.5 ${s <= r.rating ? "fill-yellow-500 text-yellow-500" : "text-gray-600"}`} />
-                      ))}
-                    </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed mb-3 line-clamp-4">&ldquo;{r.comment}&rdquo;</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-foreground">{r.name}</span>
-                      <span className="text-[10px] text-gray-500">{r.source === "google" ? "Google" : new Date(r.createdAt).toLocaleDateString()}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+        <div
+          className="relative"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
+          <div className="overflow-hidden">
+            <motion.div
+              className="flex"
+              animate={{ x: `-${index * 100}%` }}
+              transition={{ duration: 1, ease: [0.4, 0, 0.2, 1] }}
+            >
+              {pages.map((page, i) => (
+                <div key={i} className="w-full flex-shrink-0 grid grid-cols-1 md:grid-cols-3 gap-4 px-1">
+                  {page.map((r) => (
+                    <Card key={r.id} className="bg-btl-card/80 border-btl-card-border h-full">
+                      <CardContent className="p-4 md:p-5">
+                        <div className="flex items-center gap-1 mb-2">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star key={s} className={`h-3.5 w-3.5 ${s <= r.rating ? "fill-yellow-500 text-yellow-500" : "text-gray-600"}`} />
+                          ))}
+                        </div>
+                        <p className="text-sm text-muted-foreground leading-relaxed mb-3 line-clamp-4">&ldquo;{r.comment}&rdquo;</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-foreground">{r.name}</span>
+                          <span className="text-[10px] text-gray-500">{r.source === "google" ? "Google" : new Date(r.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ))}
+            </motion.div>
           </div>
 
-          {reviews.length > 3 && (
-            <div className="flex justify-center gap-2 mt-6">
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" disabled={index === 0} onClick={() => setIndex(Math.max(0, index - 1))}>
-                <ChevronLeft className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" disabled={index + 3 >= reviews.length} onClick={() => setIndex(Math.min(index + 1, reviews.length - 3))}>
-                <ChevronRight className="h-5 w-5" />
-              </Button>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-3 mt-5">
+              <button onClick={() => setIndex(Math.max(0, index - 1))} disabled={index === 0}
+                className="h-8 w-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <div className="flex items-center gap-1.5">
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <button key={i} onClick={() => setIndex(i)}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${i === index ? "w-5 bg-btl-red" : "w-1.5 bg-white/20 hover:bg-white/40"}`}
+                  />
+                ))}
+              </div>
+              <button onClick={() => setIndex(Math.min(totalPages - 1, index + 1))} disabled={index >= totalPages - 1}
+                className="h-8 w-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                <ChevronRight className="h-4 w-4" />
+              </button>
             </div>
           )}
         </div>
@@ -142,11 +179,13 @@ export default function ReviewsSection() {
               </CardContent>
             </Card>
           )}
-          <a href="https://search.google.com/local/writereview?placeid=PLACE_ID" target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" className="border-white/20 text-muted-foreground hover:text-foreground min-h-[44px]">
-              <ExternalLink className="h-4 w-4 mr-2" /> Review on Google
-            </Button>
-          </a>
+          {googleReviewUrl && (
+            <a href={googleReviewUrl} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="border-white/20 text-muted-foreground hover:text-foreground min-h-[44px]">
+                <ExternalLink className="h-4 w-4 mr-2" /> Review on Google
+              </Button>
+            </a>
+          )}
         </div>
       </div>
     </section>
