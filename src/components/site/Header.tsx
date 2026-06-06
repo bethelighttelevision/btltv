@@ -1,39 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Menu, Sparkles } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import { toast } from "sonner";
-import { BeforeInstallPromptEvent, NAV_LINKS } from "@/lib/site-data";
+import { NAV_LINKS } from "@/lib/site-data";
 
 export default function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [pwaInstallPrompt, setPwaInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [showIosInstall, setShowIosInstall] = useState(false);
-  const [isIos, setIsIos] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
-
-  useEffect(() => {
-    const detectPWA = () => {
-      const ua = navigator.userAgent;
-      const ios = /iPad|iPhone|iPod/.test(ua);
-      setIsIos(ios);
-      const standalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as unknown as { standalone?: boolean }).standalone === true;
-      setIsStandalone(standalone);
-      if (ios && !standalone) {
-        const dismissed = sessionStorage.getItem('btl-ios-install-dismissed');
-        if (!dismissed) setShowIosInstall(true);
-      }
-    };
-    requestAnimationFrame(detectPWA);
-    const handler = (e: Event) => { e.preventDefault(); setPwaInstallPrompt(e as BeforeInstallPromptEvent); };
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
 
   const getHref = (key: string) => {
     if (key === "home") return "/";
@@ -51,19 +28,6 @@ export default function Header() {
         <Link href="/" className="flex items-center gap-2 shrink-0">
           <img src="/images/logo/btl-logo.webp" alt="BTL TV" width={500} height={500} className="h-8 w-auto object-contain eternal-flame" />
         </Link>
-
-        {pwaInstallPrompt && !isStandalone && (
-          <Button className="hidden md:flex bg-btl-red hover:bg-btl-red-dark text-white text-xs h-8 px-3 mr-2"
-            onClick={async () => { await pwaInstallPrompt.prompt(); setPwaInstallPrompt(null); }}>
-            <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Install App
-          </Button>
-        )}
-        {isIos && !isStandalone && showIosInstall && (
-          <Button className="hidden md:flex bg-btl-red hover:bg-btl-red-dark text-white text-xs h-8 px-3 mr-2"
-            onClick={() => { toast.info('Tap the Share button (⬆) in Safari, then "Add to Home Screen"'); }}>
-            <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Install App
-          </Button>
-        )}
 
         <nav className="hidden md:flex items-center gap-1">
           {NAV_LINKS.map((link) => {
@@ -99,18 +63,7 @@ export default function Header() {
                   </Link>
                 );
               })}
-              {pwaInstallPrompt && !isStandalone && (
-                <button onClick={async () => { await pwaInstallPrompt.prompt(); setPwaInstallPrompt(null); }}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium bg-btl-red text-white mt-2">
-                  <Sparkles className="h-4 w-4" /> Install App
-                </button>
-              )}
-              {isIos && !isStandalone && showIosInstall && (
-                <button onClick={() => { toast.info('Tap the Share button (⬆) in Safari, then "Add to Home Screen"'); }}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium bg-btl-red text-white mt-2">
-                  <Sparkles className="h-4 w-4" /> Install App
-                </button>
-              )}
+
             </div>
           </SheetContent>
         </Sheet>

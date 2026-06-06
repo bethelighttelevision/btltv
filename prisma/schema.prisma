@@ -166,6 +166,7 @@ model AppDownload {
   ip        String?
   city      String?
   country   String?
+  isp       String?
   userAgent String?
   referrer  String?
   createdAt DateTime @default(now())
@@ -188,3 +189,5 @@ model VideoSEO {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 }
+
+

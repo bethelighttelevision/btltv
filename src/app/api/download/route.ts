@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+const BOT_ISPS = ["google", "amazon", "microsoft", "azure", "cloudflare", "digitalocean", "oracle", "hetzner", "ovh"];
+
+function isBotIsp(isp: string): boolean {
+  const lower = isp.toLowerCase();
+  return BOT_ISPS.some(bot => lower.includes(bot));
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const platform = searchParams.get("platform") || "android";
@@ -13,21 +20,26 @@ export async function GET(request: NextRequest) {
 
   let city = "";
   let country = "";
+  let isp = "";
 
   try {
-    const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=city,country`, { signal: AbortSignal.timeout(3000) });
+    const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=city,country,isp`, { signal: AbortSignal.timeout(3000) });
     if (geoRes.ok) {
       const geo = await geoRes.json();
       city = geo.city || "";
       country = geo.country || "";
+      isp = geo.isp || "";
     }
   } catch {}
 
-  try {
-    await prisma.appDownload.create({
-      data: { platform, version: "1.0.0", ip, city, country, userAgent, referrer },
-    });
-  } catch {}
+  // Only record real users, not bots/cloud providers
+  if (!isp || !isBotIsp(isp)) {
+    try {
+      await prisma.appDownload.create({
+        data: { platform, version: "1.0.0", ip, city, country, isp, userAgent, referrer },
+      });
+    } catch {}
+  }
 
   const apkUrl = "https://expo.dev/artifacts/eas/q5eLL2FpbW3GBDv3qvYJ7Q.apk";
 
