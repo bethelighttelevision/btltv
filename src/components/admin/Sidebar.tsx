@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Tv, Users,   Video, Radio, BookOpen,
-  Settings, LogOut, ChevronDown, Download, MessageSquare, GraduationCap, Search,
+  Settings, LogOut, ChevronDown, Download, MessageSquare, GraduationCap, Search, Bell,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
@@ -28,6 +28,7 @@ const navItems = [
   { href: "/admin/live-tv", label: "Live TV", icon: Radio },
   { href: "/admin/team", label: "Team", icon: Users },
   { href: "/admin/downloads", label: "Downloads", icon: Download },
+  { href: "/admin/notifications", label: "Notifications", icon: Bell },
   { href: "/admin/reviews", label: "Reviews", icon: MessageSquare },
   {
     label: "Bible School", icon: GraduationCap,

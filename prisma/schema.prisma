@@ -172,6 +172,14 @@ model AppDownload {
   createdAt DateTime @default(now())
 }
 
+model PushToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  platform  String   @default("ios")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
 model VideoSEO {
   id             String    @id @default(cuid())
   videoId        String    @unique
