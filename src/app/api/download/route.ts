@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     } catch {}
   }
 
-  const apkUrl = "https://expo.dev/artifacts/eas/q5eLL2FpbW3GBDv3qvYJ7Q.apk";
+  const apkUrl = "https://expo.dev/artifacts/eas/Jjos7CJiBSW_AoQkxufZxSsUEz3E0Mqy0rGR2U5dIDA.apk";
 
   return NextResponse.redirect(apkUrl, {
     status: 307,
