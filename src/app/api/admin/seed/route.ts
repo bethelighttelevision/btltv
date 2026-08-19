@@ -248,7 +248,6 @@ const TEAM_MEMBERS = [
   { name: "Emmanuel Aftab", designation: "Bishop", photo: "/images/team/emmanuel-aftab.webp", displayOrder: 8 },
   { name: "Douwe Wijmenga", designation: "Predikant", photo: "/images/team/douwe-wijmenga.webp", displayOrder: 9 },
   { name: "Imko Postma", designation: "Predikant", photo: "/images/team/imko-postma.webp", displayOrder: 10 },
-  { name: "Imran Gill", designation: "Pastor", photo: "/images/team/imran-gill.webp", displayOrder: 11 },
   { name: "Munawar Virk", designation: "Pastor", photo: "/images/team/munawar-virk.webp", displayOrder: 12 },
   { name: "Nadeem K Dean", designation: "Pastor", photo: "/images/team/nadeem-k-dean.webp", displayOrder: 13 },
   { name: "Parvaiz Iqbal", designation: "Pastor", photo: "/images/team/parvaiz-iqbal.webp", displayOrder: 14 },
