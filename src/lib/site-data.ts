@@ -479,7 +479,6 @@ export const TEAM_GROUPS = [
       { name: "Douwe Wijmenga", role: "Predikant", image: "/images/team/douwe-wijmenga.webp" },
       { name: "Imko Postma", role: "Predikant", image: "/images/team/imko-postma.webp" },
       { name: "Terpstra", role: "Predikant", image: "/images/team/terpstra.webp" },
-      { name: "Imran Gill", role: "Pastor", image: "/images/team/imran-gill.webp" },
       { name: "Munawar Virk", role: "Pastor", image: "/images/team/munawar-virk.webp" },
       { name: "Nadeem K Dean", role: "Pastor", image: "/images/team/nadeem-k-dean.webp" },
       { name: "Parvaiz Iqbal", role: "Pastor", image: "/images/team/parvaiz-iqbal.webp" },
