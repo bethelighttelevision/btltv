@@ -1304,12 +1304,12 @@
         background: radial-gradient(900px 320px at 16% 50%, rgba(255,255,255,.16), transparent 62%), var(--red);
         color: #fff; overflow: hidden;
       }
-      .cta-inner { display: flex; align-items: center; justify-content: space-between; gap: 30px; flex-wrap: wrap; padding: clamp(46px, 6vw, 66px) 0; }
-      .cta-copy { max-width: 38em; }
-      .cta-copy h2 { font-size: clamp(2.1rem, 5vw, 3.3rem); color: #fff; }
-      .cta-copy h2 em { font-family: var(--font-serif); font-style: italic; font-weight: 600; color: var(--light); }
-      .cta-copy p { margin: 12px 0 0; color: rgba(255,255,255,.88); max-width: 34em; }
-      .cta-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+      .cta-inner { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 26px; padding: clamp(56px, 7vw, 84px) 0; max-width: 760px; margin-inline: auto; }
+      .cta-copy { max-width: 44em; }
+      .cta-copy h2 { font-size: clamp(1.7rem, 3.8vw, 2.6rem); font-weight: 700; line-height: 1.25; letter-spacing: -0.01em; color: #fff; }
+      .cta-copy h2 em { font-family: var(--font-serif); font-style: italic; font-weight: 500; color: var(--light); }
+      .cta-copy p { margin: 14px auto 0; color: rgba(255,255,255,.88); max-width: 36em; font-size: clamp(0.98rem, 1.6vw, 1.08rem); line-height: 1.65; }
+      .cta-actions { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
       .btn-white { background: #fff; color: var(--red-dark); box-shadow: 0 12px 30px rgba(0,0,0,.28); }
       .btn-white:hover { background: #ffe9ea; transform: translateY(-2px); box-shadow: 0 18px 38px rgba(0,0,0,.32); }
       .btn-band { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.72); }
@@ -1331,3 +1331,109 @@
       .btl-demo-scope .ab-play.is-loading { pointer-events: none; opacity: .75; }
       .btl-demo-scope .ab-play.is-loading svg { animation: abSpin 0.9s linear infinite; }
       @keyframes abSpin { to { transform: rotate(360deg); } }
+
+      /* ================================================================
+         RESPONSIVE — full device coverage (tablet + phone).
+         Every section adapts: grids stack, text scales, touch targets grow.
+         ================================================================ */
+
+      /* ---------- tablet landscape & below ---------- */
+      @media (max-width: 1024px) {
+        .section-pad { padding: clamp(56px, 8vw, 88px) 0; }
+        .hub-grid { grid-template-columns: 1fr; }
+        .live-side { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+      }
+
+      /* ---------- tablet portrait & large phone ---------- */
+      @media (max-width: 768px) {
+        .wrap { width: min(1240px, 100% - 32px); }
+        .section-pad { padding: clamp(48px, 7vw, 72px) 0; }
+
+        /* section headers */
+        .sec-head { text-align: center; }
+        .sec-head p { margin-inline: auto; }
+
+        /* hero */
+        .hero-content { padding-bottom: 9vh; }
+        .hero-cta { flex-direction: column; align-items: stretch; }
+        .hero-cta .btn { justify-content: center; }
+
+        /* live tv */
+        .live-side { grid-template-columns: 1fr; }
+        .pb-actions { flex-wrap: wrap; }
+        .pb-actions .btn { flex: 1 1 auto; justify-content: center; min-height: 48px; }
+
+        /* rails */
+        .rail-head { align-items: center; }
+        .rail-card { flex-basis: 200px; }
+
+        /* anniversary */
+        .anniv-frame { padding: 40px 18px 30px; }
+
+        /* reviews */
+        .gr-head { flex-direction: column; align-items: center; text-align: center; }
+
+        /* audio bible */
+        .ab-controls { gap: 10px; }
+        .ab-btn { width: 44px; height: 44px; }
+        .ab-extra { flex-wrap: wrap; justify-content: center; }
+
+        /* footer */
+        .foot-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
+      }
+
+      /* ---------- phone ---------- */
+      @media (max-width: 480px) {
+        .wrap { width: min(1240px, 100% - 28px); }
+        .section-pad { padding: 44px 0; }
+
+        /* headings scale down gracefully */
+        .section-title { font-size: 1.5rem; }
+        .sec-eyebrow { font-size: 0.64rem; letter-spacing: 0.22em; }
+
+        /* hero */
+        .hero-eyebrow { font-size: 0.6rem; letter-spacing: 0.24em; margin-bottom: 18px; }
+        .hero-verse { font-size: 1.65rem; }
+        .hero-title { font-size: 1.9rem; }
+        .hero-sub { font-size: 0.95rem; }
+
+        /* buttons — full width, easy to tap */
+        .btn { min-height: 48px; font-size: 0.92rem; }
+
+        /* live tv */
+        .hub-panel { padding: 14px; }
+        .np-row { flex-direction: column; align-items: flex-start; }
+
+        /* rails */
+        .rail-card { flex-basis: 168px; }
+        .rail-title { font-size: 1.1rem; }
+
+        /* anniversary */
+        .anniv-num { font-size: 6.5rem; }
+        .anniv-headline { font-size: 1.9rem; }
+
+        /* app */
+        .appx-headline { font-size: 2rem; }
+        .appx-cta .btn { width: 100%; justify-content: center; }
+
+        /* audio bible */
+        .ab-player { padding: 16px; border-radius: 18px; }
+        .ab-wave { height: 64px; }
+        .ab-play { min-width: 100px; height: 50px; padding: 0 18px; }
+        .ab-books { grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); }
+        .ab-chapters { gap: 6px; }
+        .ab-pill { min-width: 40px; height: 36px; font-size: 0.82rem; }
+
+        /* cta band */
+        .cta-copy h2 { font-size: 1.55rem; }
+        .cta-actions { width: 100%; }
+        .cta-actions .btn { flex: 1 1 auto; justify-content: center; }
+
+        /* footer */
+        .foot-grid { grid-template-columns: 1fr; text-align: center; }
+        .foot-brand p { margin-inline: auto; }
+      }
+
+      /* ---------- prevent horizontal overflow on all devices ---------- */
+      .btl-demo-scope { overflow-x: clip; }
+      .btl-demo-scope img { max-width: 100%; height: auto; }
