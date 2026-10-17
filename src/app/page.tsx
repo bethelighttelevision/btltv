@@ -29,7 +29,10 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white antialiased">
       <Header />
-      <HomeDemo />
+      {/* Pull the hero under the floating glass pill so no black gap sits between nav and Jesus */}
+      <div className="-mt-[60px] md:-mt-16">
+        <HomeDemo />
+      </div>
       <Footer />
     </div>
   );

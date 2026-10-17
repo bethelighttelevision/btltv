@@ -5,7 +5,7 @@ export const HOME_DEMO_HTML = `<div class="btl-demo-scope">
     <a class="btn btn-red" id="stickyLive" href="#live"><span class="live-dot" aria-hidden="true"></span>Watch Live TV</a>
 
     <!-- ============ 1 · COSMIC SCROLL JOURNEY — UNIVERSE → EARTH → NETHERLANDS ============ -->
-    <div class="scrub" id="heroScrub" style="height: 500vh">
+    <div class="scrub" id="heroScrub" style="height: 320vh">
       <div class="scrub-stage hero journey">
         <div class="journey-nebula" id="jNebula" aria-hidden="true">
           <div class="neb-drift neb-a"></div>
