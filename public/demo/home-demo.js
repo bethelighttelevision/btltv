@@ -662,6 +662,24 @@
           var cur = { b: 39, c: 1, playing: false }; /* default: Matthew — Chapter 1 */
           var tab = 1; /* New Testament open by default, like the live site */
           var speeds = [1, 1.25, 1.5, 2, 0.75], speedIx = 0;
+          /* Real Urdu audio — same source as btl-tv.com (GBC Pakistan MP3s) */
+          var GBC = {"Genesis":"Genesis","Exodus":"Exodus","Leviticus":"Leviticus","Numbers":"Numbers","Deuteronomy":"Deuteronomy","Joshua":"Joshua","Judges":"Judges","Ruth":"Ruth","1 Samuel":"I_Samuel","2 Samuel":"II_Samuel","1 Kings":"I_Kings","2 Kings":"II_Kings","1 Chronicles":"I_Chronicles","2 Chronicles":"II_Chronicles","Ezra":"Ezra","Nehemiah":"Nehemiah","Esther":"Esther","Job":"Job","Psalms":"Psalms","Proverbs":"Proverbs","Ecclesiastes":"Ecclesiastes","Song of Songs":"Song_of_Solomon","Isaiah":"Isaiah","Jeremiah":"Jeremiah","Lamentations":"Lamentations","Ezekiel":"Ezekiel","Daniel":"Daniel","Hosea":"Hosea","Joel":"Joel","Amos":"Amos","Obadiah":"Obadiah","Jonah":"Jonah","Micah":"Micah","Nahum":"Nahum","Habakkuk":"Habakkuk","Zephaniah":"Zephaniah","Haggai":"Haggai","Zechariah":"Zechariah","Malachi":"Malachi","Matthew":"Mathew","Mark":"Mark","Luke":"Luke","John":"John","Acts":"Acts","Romans":"Romans","1 Corinthians":"I_Corinthians","2 Corinthians":"II_Corinthians","Galatians":"Galatians","Ephesians":"Ephesians","Philippians":"Philippians","Colossians":"Colossians","1 Thessalonians":"I_Thessalonians","2 Thessalonians":"II_Thessalonians","1 Timothy":"I_Timothy","2 Timothy":"II_Timothy","Titus":"Titus","Philemon":"Philemon","Hebrews":"Hebrews","James":"James","1 Peter":"I_Peter","2 Peter":"II_Peter","1 John":"I_John","2 John":"II_John","3 John":"III_John","Jude":"Jude","Revelation":"Revelation"};
+          function gbcUrl(bi, ch) { return "https://www.gbcpakistan.org/mp3/urdu_bible/" + GBC[BOOKS[bi][0]] + ch + ".mp3"; }
+          var abAudio = new Audio();
+          abAudio.preload = "auto";
+          var abKey = "";
+          var abLoading = false;
+          function fmt(t) {
+            if (!t || !isFinite(t)) return "0:00";
+            var m = Math.floor(t / 60), s2 = Math.floor(t % 60);
+            return m + ":" + (s2 < 10 ? "0" : "") + s2;
+          }
+          function setAbLoading(v) {
+            abLoading = v;
+            elPlay.classList.toggle("is-loading", v);
+            if (v) elPlayLabel.textContent = "Loading";
+            else if (!cur.playing) elPlayLabel.textContent = "Play";
+          }
 
           var $ = function (id) { return document.getElementById(id); };
           var elTitle = $("abTitle"), elMeta = $("abMeta"), elFill = $("abFill"),
@@ -800,9 +818,9 @@
             var bk = BOOKS[cur.b];
             elTitle.innerHTML = bookNameHTML(cur.b) + " &mdash; Chapter " + cur.c;
             elMeta.textContent = "Urdu Audio Bible · " + TNAME[bk[3]] + " · Chapter " + cur.c + " of " + bk[2];
-            elFill.style.width = ((cur.c / bk[2]) * 100).toFixed(2) + "%";
-            elPosL.textContent = "Chapter " + cur.c + " of " + bk[2];
-            elPosR.textContent = bk[0] + " · " + TNAME[bk[3]];
+            elFill.style.width = "0%";
+            elPosL.textContent = "0:00";
+            elPosR.textContent = "--:--";
             elVis.innerHTML = bookNameHTML(cur.b) + " &mdash; Chapter " + cur.c;
             elChHead.innerHTML = "Chapters &middot; " + bk[0];
             elChMeta.textContent = bk[2] + (bk[2] === 1 ? " chapter" : " chapters") + " · Urdu";
@@ -815,20 +833,24 @@
             if (resetChapter) cur.c = 1;
             if (BOOKS[ix][3] !== tab && !(elSearch && elSearch.value.trim())) setTab(BOOKS[ix][3]);
             refresh();
+            loadAndPlay();
           }
           function selectChapter(ch) {
             cur.c = Math.min(Math.max(1, ch), BOOKS[cur.b][2]);
             refresh();
+            loadAndPlay();
           }
           function step(d) {
             var n = BOOKS[cur.b][2];
-            if (cur.c + d > n) { selectBook((cur.b + 1) % BOOKS.length, true); }
-            else if (cur.c + d < 1) {
+            if (cur.c + d > n) {
+              cur.b = (cur.b + 1) % BOOKS.length; cur.c = 1;
+              if (BOOKS[cur.b][3] !== tab) setTab(BOOKS[cur.b][3]);
+            } else if (cur.c + d < 1) {
               var pb = (cur.b + BOOKS.length - 1) % BOOKS.length;
               cur.b = pb; cur.c = BOOKS[pb][2];
               if (BOOKS[pb][3] !== tab) setTab(BOOKS[pb][3]);
-              refresh();
-            } else selectChapter(cur.c + d);
+            } else { cur.c = cur.c + d; }
+            refresh();
           }
 
           /* ----- testament tabs + search ----- */
@@ -853,13 +875,53 @@
             elPlayLabel.textContent = v ? "Pause" : "Play";
             elPlay.setAttribute("aria-label", v ? "Pause" : "Play the Urdu Audio Bible");
           }
+          function loadAndPlay() {
+            var key = cur.b + ":" + cur.c;
+            setAbLoading(true);
+            if (abKey !== key) {
+              abKey = key;
+              abAudio.src = gbcUrl(cur.b, cur.c);
+            }
+            abAudio.playbackRate = speeds[speedIx];
+            var pr = abAudio.play();
+            if (pr && pr.catch) pr.catch(function () {
+              setAbLoading(false);
+              setPlaying(false);
+              elPlayLabel.textContent = "Retry";
+            });
+          }
           elPlay.addEventListener("click", function () {
-            var now = !cur.playing;
-            setPlaying(now);
-            if (now && typeof showToast === "function") showToast("Urdu audio plays on btl-tv.com and the BTL TV app");
+            if (abLoading) return;
+            if (cur.playing) { abAudio.pause(); }
+            else { loadAndPlay(); }
           });
-          $("abPrev").addEventListener("click", function () { step(-1); });
-          $("abNext").addEventListener("click", function () { step(1); });
+          abAudio.addEventListener("play", function () { setAbLoading(false); setPlaying(true); });
+          abAudio.addEventListener("pause", function () { if (!abAudio.ended) setPlaying(false); });
+          abAudio.addEventListener("canplay", function () { setAbLoading(false); });
+          abAudio.addEventListener("waiting", function () { if (cur.playing) setAbLoading(true); });
+          abAudio.addEventListener("error", function () {
+            setAbLoading(false); setPlaying(false);
+            elPlayLabel.textContent = "Retry";
+          });
+          abAudio.addEventListener("timeupdate", function () {
+            var d = abAudio.duration;
+            if (d && isFinite(d)) {
+              elFill.style.width = ((abAudio.currentTime / d) * 100).toFixed(2) + "%";
+              elPosL.textContent = fmt(abAudio.currentTime);
+              elPosR.textContent = fmt(d);
+            }
+          });
+          abAudio.addEventListener("loadedmetadata", function () {
+            var d = abAudio.duration;
+            if (d && isFinite(d)) elPosR.textContent = fmt(d);
+          });
+          abAudio.addEventListener("ended", function () {
+            setPlaying(false);
+            if (repeatBtn.classList.contains("on")) { abAudio.currentTime = 0; loadAndPlay(); }
+            else { step(1); loadAndPlay(); }
+          });
+          $("abPrev").addEventListener("click", function () { step(-1); loadAndPlay(); });
+          $("abNext").addEventListener("click", function () { step(1); loadAndPlay(); });
           var shuffleBtn = $("abShuffle");
           shuffleBtn.addEventListener("click", function () {
             var b, c;
@@ -868,6 +930,7 @@
             cur.b = b; cur.c = c;
             if (BOOKS[b][3] !== tab) setTab(BOOKS[b][3]);
             refresh();
+            loadAndPlay();
             shuffleBtn.classList.add("on"); shuffleBtn.setAttribute("aria-pressed", "true");
             setTimeout(function () { shuffleBtn.classList.remove("on"); shuffleBtn.setAttribute("aria-pressed", "false"); }, 1600);
           });
@@ -881,9 +944,16 @@
           speedBtn.addEventListener("click", function () {
             speedIx = (speedIx + 1) % speeds.length;
             speedBtn.textContent = "Speed " + speeds[speedIx].toFixed(2).replace(/0$/, "") + "x";
+            abAudio.playbackRate = speeds[speedIx];
           });
           var vol = $("abVol"), volVal = $("abVolVal");
-          if (vol && volVal) vol.addEventListener("input", function () { volVal.textContent = vol.value + "%"; });
+          if (vol && volVal) {
+            abAudio.volume = (parseInt(vol.value, 10) || 0) / 100;
+            vol.addEventListener("input", function () {
+              volVal.textContent = vol.value + "%";
+              abAudio.volume = (parseInt(vol.value, 10) || 0) / 100;
+            });
+          }
 
           /* ----- pause the living Bible off-screen ----- */
           section.classList.add("paused");

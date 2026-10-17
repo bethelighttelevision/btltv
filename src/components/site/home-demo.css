@@ -1327,3 +1327,7 @@
         .reveal { opacity: 1; transform: none; }
       }
     
+      /* audio loading spinner on the play button */
+      .btl-demo-scope .ab-play.is-loading { pointer-events: none; opacity: .75; }
+      .btl-demo-scope .ab-play.is-loading svg { animation: abSpin 0.9s linear infinite; }
+      @keyframes abSpin { to { transform: rotate(360deg); } }
