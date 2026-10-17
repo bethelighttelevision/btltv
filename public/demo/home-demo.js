@@ -506,6 +506,8 @@
         document.querySelectorAll("[data-program], [data-video]").forEach(function (el) {
           el.addEventListener("click", function (e) {
             e.preventDefault();
+            var goHref = el.getAttribute("data-href");
+            if (goHref) { window.location.href = goHref; return; }
             var vid = el.getAttribute("data-video");
             var title = el.getAttribute("data-title") || "";
             var card = el.closest(".card, .rail-card");
@@ -595,8 +597,10 @@
             item.appendChild(body);
             item.addEventListener("click", function (e) {
               e.preventDefault();
-              var vid = card.getAttribute("data-video");
+              var goHref2 = card.getAttribute("data-href");
               closeGrid();
+              if (goHref2) { window.location.href = goHref2; return; }
+              var vid = card.getAttribute("data-video");
               if (vid) { openTheater(name, vid); return; }
               if (!card.hasAttribute("data-program")) {
                 liveSection.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
