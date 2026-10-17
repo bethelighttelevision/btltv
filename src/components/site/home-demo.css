@@ -17,8 +17,8 @@
         --gold-bright: #f6d789;
         --shadow: 0 30px 70px rgba(0, 0, 0, 0.6);
         --radius: 16px;
-        --font-body: "Manrope", system-ui, -apple-system, sans-serif;
-        --font-serif: "Cormorant Garamond", Georgia, serif;
+        --font-body: inherit; /* site font (Geist) */
+        --font-serif: inherit; /* site font (Geist) */
       }
 
       * { box-sizing: border-box; }
