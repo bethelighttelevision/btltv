@@ -23,8 +23,8 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-btl-darker/95 backdrop-blur-md border-b border-border/30">
-      <div className="flex items-center justify-between px-4 md:px-6 h-14">
+    <header className="sticky top-0 z-50 px-3 sm:px-4 pt-3">
+      <div className="mx-auto max-w-6xl flex items-center justify-between h-12 md:h-[52px] pl-4 pr-2 md:pl-5 md:pr-2.5 rounded-2xl border border-white/10 bg-[#0c0c13]/55 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)]">
         <Link href="/" className="flex items-center gap-2 shrink-0">
           <img src="/images/logo/btl-logo.webp" alt="BTL TV" width={500} height={500} className="h-8 w-auto object-contain eternal-flame" />
         </Link>
