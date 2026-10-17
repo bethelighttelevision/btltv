@@ -1,6 +1,10 @@
 
       (function () {
         "use strict";
+        /* run-once per demo root (guards against double-boot duplicating split words) */
+        var __root = document.getElementById("heroScrub");
+        if (!__root || __root.getAttribute("data-demo-ran") === "1") return;
+        __root.setAttribute("data-demo-ran", "1");
         var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         var clamp = function (v, a, b) { return Math.min(b, Math.max(a, v)); };
         var seg = function (p, a, b) { return clamp((p - a) / (b - a), 0, 1); };
@@ -8,6 +12,7 @@
 
         /* ----- split verses into words ----- */
         function splitWords(el, text) {
+          el.innerHTML = "";
           text.split(" ").forEach(function (word, i, arr) {
             var s = document.createElement("span");
             s.className = "w";
