@@ -1437,3 +1437,19 @@
       /* ---------- prevent horizontal overflow on all devices ---------- */
       .btl-demo-scope { overflow-x: clip; }
       .btl-demo-scope img { max-width: 100%; height: auto; }
+
+      /* ---------- mobile static hero — clean, no overlap, no empty scroll ---------- */
+      @media (max-width: 768px) {
+        #heroScrub.static { height: auto !important; min-height: 100svh; }
+        #heroScrub.static .scrub-stage { position: relative; height: auto; min-height: 100svh; display: flex; flex-direction: column; }
+        /* keep only Jesus + stars as the backdrop; hide scroll-journey phases */
+        #heroScrub.static .journey-earth,
+        #heroScrub.static .journey-nl,
+        #heroScrub.static .journey-clouds,
+        #heroScrub.static .journey-flare { display: none !important; }
+        #heroScrub.static .journey-jesus { position: absolute; inset: 0; opacity: 0.55; }
+        #heroScrub.static .journey-jesus img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
+        #heroScrub.static .hero-shade { background: linear-gradient(180deg, rgba(3,3,4,.55), rgba(3,3,4,.25) 40%, rgba(3,3,4,.88)); }
+        #heroScrub.static .hero-content { padding-top: 110px; }
+        #heroScrub.static .hero-main { padding-bottom: 48px; }
+      }

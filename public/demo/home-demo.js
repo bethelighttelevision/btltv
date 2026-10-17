@@ -399,7 +399,8 @@
         }
 
         preloadHeroImages().then(function () {
-          if (reduced) initStaticHero();
+          var isMobileHero = window.matchMedia("(max-width: 768px)").matches;
+          if (reduced || isMobileHero) initStaticHero();
           else initScrollSystem();
         });
 
